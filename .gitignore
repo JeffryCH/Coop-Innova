@@ -1,0 +1,9 @@
+# Ignorar archivos y carpetas sensibles o de configuración
+.github/
+index.js
+package.json
+package-lock.json
+.env
+node_modules/
+GITHUB_TOKEN.env
+
