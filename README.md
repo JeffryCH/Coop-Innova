@@ -5,7 +5,7 @@ Este proyecto está configurado para usar Node.js, integrarse con GitHub y conec
 ## Configuración de MySQL
 - Usuario: root
 - Contraseña: root
-- Puerto: 3306
+- Puerto: 3306 (local no esta disponible para internet bajo ip privada de Conexiones Metropolitanas)
 
 ## Integración con GitHub
 - Utiliza un token personal (recomendado: variable de entorno para mayor seguridad).
