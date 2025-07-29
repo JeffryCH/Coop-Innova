@@ -1,0 +1,73 @@
+<!-- Modal de Conversión de Monedas -->
+<div id="modal-conversion" class="modal-conversion-bg" role="dialog" aria-modal="true" aria-labelledby="modalConversionTitle" tabindex="-1" style="display:none;">
+  <div class="modal-conversion-content" role="document">
+    <button class="modal-conversion-close" aria-label="Cerrar" tabindex="0">&times;</button>
+    <h2 id="modalConversionTitle" class="modal-conversion-title">
+      <span style="vertical-align:middle; font-size:1.5em; color:#0d6efd; margin-right:8px;">&#128176;</span>
+      Conversor de Monedas
+    </h2>
+    <!-- Cuadro visual de tasas de cambio -->
+    <div id="conversion-tasas" class="conversion-tasas-box" aria-live="polite" style="margin-bottom:1.2em;">
+      <div class="conversion-tasas-title" style="font-weight:600; font-size:1.1em; color:#0d6efd; margin-bottom:0.5em;">Tipo de cambio actual</div>
+      <div class="conversion-tasas-grid" style="display:flex; gap:1.5em; justify-content:center;">
+        <div class="conversion-tasa-item" style="background:#f8f9fa; border-radius:10px; padding:1em 1.2em; box-shadow:0 1px 4px #0001; min-width:120px;">
+          <span class="conversion-tasa-moneda" style="font-weight:700; color:#0d6efd; font-size:1.1em;">USD</span>
+          <div class="conversion-tasa-cuadros" style="margin-top:0.5em;">
+            <div class="conversion-tasa-cuadro" style="margin-bottom:0.3em;">
+              <span class="conversion-tasa-label" style="font-size:0.95em;">Venta</span>
+              <span id="tasa-usd-venta" class="conversion-tasa-valor" style="font-weight:600; margin-left:0.5em;">--</span>
+            </div>
+            <div class="conversion-tasa-cuadro">
+              <span class="conversion-tasa-label" style="font-size:0.95em;">Compra</span>
+              <span id="tasa-usd-compra" class="conversion-tasa-valor" style="font-weight:600; margin-left:0.5em;">--</span>
+            </div>
+          </div>
+        </div>
+        <div class="conversion-tasa-item" style="background:#f8f9fa; border-radius:10px; padding:1em 1.2em; box-shadow:0 1px 4px #0001; min-width:120px;">
+          <span class="conversion-tasa-moneda" style="font-weight:700; color:#198754; font-size:1.1em;">EUR</span>
+          <div class="conversion-tasa-cuadros" style="margin-top:0.5em;">
+            <div class="conversion-tasa-cuadro" style="margin-bottom:0.3em;">
+              <span class="conversion-tasa-label" style="font-size:0.95em;">Venta</span>
+              <span id="tasa-eur-venta" class="conversion-tasa-valor" style="font-weight:600; margin-left:0.5em;">--</span>
+            </div>
+            <div class="conversion-tasa-cuadro">
+              <span class="conversion-tasa-label" style="font-size:0.95em;">Compra</span>
+              <span id="tasa-eur-compra" class="conversion-tasa-valor" style="font-weight:600; margin-left:0.5em;">--</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="conversion-tasas-error" class="conversion-tasas-error" style="display:none; margin-top:1em; color:#dc3545; font-weight:500; text-align:center;">
+        <span>
+          Tipo de cambio USD y EUR no disponibles. No es posible realizar conversiones.
+        </span>
+      </div>
+    </div>
+    <form id="conversion-form" autocomplete="off" style="margin-top:0.5em;">
+      <div class="modal-conversion-row" style="display:flex; align-items:center; gap:0.7em; margin-bottom:1em;">
+        <label for="conversion-amount" style="min-width:70px;">Cantidad</label>
+        <input type="number" id="conversion-amount" name="amount" min="0" step="any" required aria-required="true" autocomplete="off" style="flex:1; padding:0.5em; border-radius:6px; border:1px solid #ced4da;" />
+      </div>
+      <div class="modal-conversion-row" style="display:flex; align-items:center; gap:0.7em; margin-bottom:1em;">
+        <label for="conversion-from" style="min-width:40px;">De</label>
+        <select id="conversion-from" name="from" required aria-required="true" style="padding:0.4em 0.7em; border-radius:6px; border:1px solid #ced4da;">
+          <option value="CRC">Colón (CRC)</option>
+          <option value="USD">Dólar (USD)</option>
+          <option value="EUR">Euro (EUR)</option>
+        </select>
+        <button type="button" id="conversion-swap" class="modal-conversion-swap" aria-label="Invertir monedas" tabindex="0" style="background:#e9ecef; border:none; border-radius:50%; width:2.2em; height:2.2em; font-size:1.2em; cursor:pointer; transition:background 0.2s;">&#8646;</button>
+        <label for="conversion-to" style="min-width:20px;">A</label>
+        <select id="conversion-to" name="to" required aria-required="true" style="padding:0.4em 0.7em; border-radius:6px; border:1px solid #ced4da;">
+          <option value="USD">Dólar (USD)</option>
+          <option value="CRC">Colón (CRC)</option>
+          <option value="EUR">Euro (EUR)</option>
+        </select>
+      </div>
+      <div class="modal-conversion-row" style="text-align:center; margin-bottom:1em;">
+        <button type="submit" class="modal-conversion-submit" style="background:#0d6efd; color:#fff; border:none; border-radius:6px; padding:0.7em 2.2em; font-size:1.1em; font-weight:600; cursor:pointer; transition:background 0.2s;">Convertir</button>
+      </div>
+      <div id="conversion-result" class="modal-conversion-result" aria-live="polite" style="margin-bottom:0.5em; text-align:center;"></div>
+      <div id="conversion-error" class="modal-conversion-error" aria-live="assertive" style="color:#dc3545; text-align:center;"></div>
+    </form>
+  </div>
+</div>

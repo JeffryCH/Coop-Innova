@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
   <meta charset="UTF-8">
   <title>Coop-Innova</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -8,27 +9,10 @@
   <link rel="stylesheet" href="css/estilo.css">
 </head>
 <body>
+  <div id="loader-bg"><div class="loader-spinner"></div></div>
 
 
-  <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
-    <div class="container">
-      <a class="navbar-brand fw-bold" href="#">Coop-Innova</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menu">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="menu">
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item"><a class="nav-link active" href="index.html">Inicio</a></li>
-          <li class="nav-item"><a class="nav-link" href="#">Servicios</a></li>
-          <li class="nav-item"><a class="nav-link" href="solicitar_credito.html">Solicitar Crédito</a></li>
-          <li class="nav-item"><a class="nav-link" href="#">Ingresar</a></li>
-          <li class="nav-item"><a class="nav-link" href="movimientos.html">Movimientos</a></li>
-          <li class="nav-item"><a class="nav-link" href="ver_perfil.html">Ver Perfil</a></li>
-          <li class="nav-item"><a class="nav-link" href="#">Contacto</a></li>
-        </ul>
-      </div>
-    </div>
-  </nav>
+  <div id="navbar"></div>
 
 
 <div id="carouselInicio" class="carousel slide mt-5" data-bs-ride="carousel">
@@ -110,5 +94,6 @@
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/includes.js"></script>
 </body>
 </html>
