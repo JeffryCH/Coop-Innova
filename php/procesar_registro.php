@@ -3,23 +3,40 @@ include 'conexion_registro.php';
 
 if (isset($_POST["nombre"]) && isset($_POST["usuario"]) && isset($_POST["password"]) && isset($_POST["rol"])) {
 
-    // Conexión a la base de datos
-    $host = "localhost"; 
-    $user = "root";
-    $password = "kev123"; // <-- ajusta si es diferente
-    $base_datos = "coop_innova";
+    // Función para intentar conexión con múltiples credenciales
+    function conectarBaseDatos()
+    {
+        $host = "localhost";
+        $base_datos = "coop_innova";
+
+        // Intentar múltiples configuraciones de usuario/contraseña
+        $credenciales = [
+            ['user' => 'root', 'password' => 'root'],      // Primera opción
+            ['user' => 'root', 'password' => 'kev123']     // Segunda opción (compañero)
+        ];
+
+        foreach ($credenciales as $cred) {
+            $conexion = new mysqli($host, $cred['user'], $cred['password'], $base_datos);
+
+            if (!$conexion->connect_error) {
+                return $conexion; // Conexión exitosa
+            }
+        }
+
+        return false; // No se pudo conectar con ninguna credencial
+    }
 
     $nombre = $_POST["nombre"];
     $usuario = $_POST["usuario"];
     $passwordPlano = $_POST["password"];
     $rol = $_POST["rol"];
 
-    // Conectar
-    $conexion = new mysqli($host, $user, $password, $base_datos);
+    // Conectar usando la función que prueba múltiples credenciales
+    $conexion = conectarBaseDatos();
 
     // Verificar conexión
-    if ($conexion->connect_error) {
-        die("Error de conexión: " . $conexion->connect_error);
+    if (!$conexion) {
+        die("Error de conexión: No se pudo conectar con ninguna de las credenciales disponibles");
     }
 
     // Encriptar contraseña antes de guardar

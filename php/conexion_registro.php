@@ -1,15 +1,18 @@
 <?php
 // conexion.php
-$host = "localhost"; 
-$user = "root";
-$password = "kev123";
-$base_datos = "coop_innova";
+require_once 'database_config.php';
 
-$conexion = new mysqli($host, $user, $password, $base_datos);
+// Obtener conexión usando la configuración centralizada
+$conexion = DatabaseConfig::getConnection();
 
-if ($conexion->connect_error) {
-    die("Conexión fallida: " . $conexion->connect_error);
-} 
+if (!$conexion) {
+    $info = DatabaseConfig::getConnectionInfo();
+    if ($info) {
+        die("Conexión fallida: La base de datos '{$info['database']}' no existe o no es accesible. Host: {$info['host']}, User: {$info['user']}");
+    } else {
+        die("Conexión fallida: No se pudo conectar con ninguna de las credenciales configuradas");
+    }
+}
 
 
 // // ********** SELECT: Listar usuarios **********
