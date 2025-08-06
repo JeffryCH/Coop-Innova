@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Navbar - Coop-Innova</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-3">
+        <h1>🔧 Debug Navbar - Tipo de Cambio</h1>
+        <div class="alert alert-info">
+            <p>Esta página es para diagnosticar el problema del tipo de cambio en el navbar.</p>
+            <p>Abre la consola del navegador (F12) para ver los logs detallados.</p>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>🌐 Test API Directo</h5>
+                    </div>
+                    <div class="card-body">
+                        <button id="testAPI" class="btn btn-primary">Probar API</button>
+                        <div id="apiResult" class="mt-3"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>🎯 Test Elementos DOM</h5>
+                    </div>
+                    <div class="card-body">
+                        <button id="testDOM" class="btn btn-secondary">Verificar DOM</button>
+                        <div id="domResult" class="mt-3"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-4">
+            <button id="forceUpdate" class="btn btn-success">🔄 Forzar Actualización Navbar</button>
+        </div>
+    </div>
+
+    <!-- Navbar importado -->
+    <div id="navbar"></div>
+    
+    <!-- Modal de conversión importado -->
+    <div id="modal-conversion-container"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/includes.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Test API directo
+            document.getElementById('testAPI').addEventListener('click', async function() {
+                const result = document.getElementById('apiResult');
+                result.innerHTML = '🔄 Probando API...';
+                
+                try {
+                    const response = await fetch('/api/tipo-cambio');
+                    const data = await response.json();
+                    
+                    result.innerHTML = `
+                        <div class="alert alert-success">
+                            <h6>✅ API Response:</h6>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                } catch (error) {
+                    result.innerHTML = `
+                        <div class="alert alert-danger">
+                            <h6>❌ Error:</h6>
+                            <p>${error.message}</p>
+                        </div>
+                    `;
+                }
+            });
+            
+            // Test elementos DOM
+            document.getElementById('testDOM').addEventListener('click', function() {
+                const result = document.getElementById('domResult');
+                const elementos = [
+                    'navbar-usd-compra', 'navbar-usd-venta', 
+                    'navbar-eur-compra', 'navbar-eur-venta'
+                ];
+                
+                let html = '<div class="alert alert-info"><h6>🎯 Estado de elementos DOM:</h6><ul>';
+                
+                elementos.forEach(id => {
+                    const elem = document.getElementById(id);
+                    const estado = elem ? 
+                        `✅ ENCONTRADO (texto: "${elem.textContent}")` : 
+                        '❌ NO ENCONTRADO';
+                    html += `<li><strong>${id}:</strong> ${estado}</li>`;
+                });
+                
+                html += '</ul></div>';
+                result.innerHTML = html;
+            });
+            
+            // Forzar actualización
+            document.getElementById('forceUpdate').addEventListener('click', function() {
+                if (typeof window.forzarActualizacionNavbar === 'function') {
+                    console.log('🔧 Forzando actualización desde debug...');
+                    window.forzarActualizacionNavbar();
+                } else {
+                    console.log('❌ window.forzarActualizacionNavbar no disponible');
+                    alert('Función forzarActualizacionNavbar no disponible');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

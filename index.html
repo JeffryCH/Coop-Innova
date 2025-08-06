@@ -11,29 +11,11 @@
 <body>
   <div id="loader-bg"><div class="loader-spinner"></div></div>
 
-
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
-        <div class="container">
-            <a class="navbar-brand fw-bold" href="#">Coop-Innova</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menu">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="menu">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link active" href="index.html">Inicio</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Servicios</a></li>
-                    <li class="nav-item"><a class="nav-link" href="solicitar_credito.html">Solicitar Crédito</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Ingresar</a></li>
-                    <li class="nav-item"><a class="nav-link" href="movimientos.html">Movimientos</a></li>
-                    <li class="nav-item"><a class="nav-link" href="ver_perfil.html">Ver Perfil</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Contacto</a></li>
-                    <li class="nav-item"><a class="nav-link" href="registro.html">Registro de Usuario</a></li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+  <!-- Navbar importado -->
   <div id="navbar"></div>
 
+  <!-- Modal de conversión importado -->
+  <div id="modal-conversion-container"></div>
 
 <div id="carouselInicio" class="carousel slide mt-5" data-bs-ride="carousel">
   <div class="carousel-inner">
@@ -47,6 +29,7 @@
         <a href="login.html" class="btn btn-primary btn-lg">Ingresar al Sistema</a>
       </div>
     </div>
+    
     <div class="carousel-item">
       <img src="img/CoopInnova2.png" class="d-block w-100" alt="Banner 2" style="max-height: 1000px; object-fit: cover;object-position: top;">
       <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 rounded p-3">
@@ -54,6 +37,7 @@
         <p>Sin filas, sin papeles. Realiza todo desde tu celular o computadora.</p>
       </div>
     </div>
+    
     <div class="carousel-item">
       <img src="img/CoopInnova1.png" class="d-block w-100" alt="Banner 3" style="max-height: 1000px; object-fit: cover;object-position: top;">
       <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 rounded p-3">
@@ -72,48 +56,201 @@
   </button>
 </div>
 
-
-
-
-  <section class="container my-5">
-    <h2 class="text-center mb-4 text-primary">¿Qué puedes hacer con Coop-Innova?</h2>
-    <div class="row text-center">
-      <div class="col-md-4 mb-4">
-        <div class="card shadow">
-          <div class="card-body">
-            <h5 class="card-title">Consultar Saldos</h5>
-            <p class="card-text">Accede al resumen de tus movimientos y saldos en tiempo real.</p>
-          </div>
+<!-- Sección de Tipo de Cambio -->
+<section class="container my-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-10">
+      <div class="card shadow-lg border-0">
+        <div class="card-header bg-gradient text-white text-center" style="background: linear-gradient(135deg, #007bff, #0056b3);">
+          <h4 class="mb-0">💱 Tipo de Cambio en Tiempo Real</h4>
+          <small>Banco Central de Costa Rica</small>
         </div>
-      </div>
-      <div class="col-md-4 mb-4">
-        <div class="card shadow">
-          <div class="card-body">
-            <h5 class="card-title">Solicitar Créditos</h5>
-            <p class="card-text">Gestiona tus solicitudes de crédito sin filas ni papeleos.</p>
+        <div class="card-body p-4">
+          <div class="row">
+            <!-- USD -->
+            <div class="col-md-6 mb-3">
+              <div class="card bg-light h-100">
+                <div class="card-body text-center">
+                  <div class="display-6 mb-2">💵</div>
+                  <h5 class="card-title text-primary">Dólar Estadounidense</h5>
+                  <div class="row">
+                    <div class="col-6">
+                      <div class="border-end">
+                        <small class="text-muted d-block">COMPRA</small>
+                        <span id="index-usd-compra" class="h5 text-success fw-bold">₡--</span>
+                      </div>
+                    </div>
+                    <div class="col-6">
+                      <small class="text-muted d-block">VENTA</small>
+                      <span id="index-usd-venta" class="h5 text-danger fw-bold">₡--</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- EUR -->
+            <div class="col-md-6 mb-3">
+              <div class="card bg-light h-100">
+                <div class="card-body text-center">
+                  <div class="display-6 mb-2">💶</div>
+                  <h5 class="card-title text-success">Euro</h5>
+                  <div class="row">
+                    <div class="col-6">
+                      <div class="border-end">
+                        <small class="text-muted d-block">COMPRA</small>
+                        <span id="index-eur-compra" class="h5 text-success fw-bold">₡--</span>
+                      </div>
+                    </div>
+                    <div class="col-6">
+                      <small class="text-muted d-block">VENTA</small>
+                      <span id="index-eur-venta" class="h5 text-danger fw-bold">₡--</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
-      <div class="col-md-4 mb-4">
-        <div class="card shadow">
-          <div class="card-body">
-            <h5 class="card-title">Ver Perfil</h5>
-            <p class="card-text">Consulta tu información personal y rol en la cooperativa.</p>
+          
+          <!-- Botones de acción -->
+          <div class="text-center mt-4">
+            <button class="btn btn-primary btn-lg me-3" onclick="abrirConversor()">
+              🔄 Conversor de Monedas
+            </button>
+            <a href="tipo-cambio.html" class="btn btn-outline-primary btn-lg">
+              📊 Ver Detalles
+            </a>
+          </div>
+          
+          <!-- Estado de actualización -->
+          <div class="text-center mt-3">
+            <small class="text-muted">
+              <span id="index-estado-actualizacion">🔄 Cargando...</span> | 
+              🕒 Última actualización: <span id="index-ultima-actualizacion">--</span>
+            </small>
           </div>
         </div>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
-
-  <footer class="bg-primary text-white text-center py-3">
-    <div class="container">
-      <p class="mb-1">&copy; 2025 Coop-Innova</p>
-      <small>Sitio institucional para asociados y administración de créditos y ahorros</small>
+<!-- Sección principal -->
+<section class="container my-5">
+  <h2 class="text-center mb-4 text-primary">¿Qué puedes hacer con Coop-Innova?</h2>
+  <div class="row text-center">
+    <div class="col-md-4 mb-4">
+      <div class="card shadow">
+        <div class="card-body">
+          <div class="display-6 text-primary mb-3">💰</div>
+          <h5 class="card-title">Consultar Saldos</h5>
+          <p class="card-text">Accede al resumen de tus movimientos y saldos en tiempo real.</p>
+          <a href="movimientos.html" class="btn btn-outline-primary">Ver Movimientos</a>
+        </div>
+      </div>
     </div>
-  </footer>
+    <div class="col-md-4 mb-4">
+      <div class="card shadow">
+        <div class="card-body">
+          <div class="display-6 text-success mb-3">💳</div>
+          <h5 class="card-title">Solicitar Créditos</h5>
+          <p class="card-text">Gestiona tus solicitudes de crédito sin filas ni papeleos.</p>
+          <a href="solicitar_credito.html" class="btn btn-outline-success">Solicitar Crédito</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 mb-4">
+      <div class="card shadow">
+        <div class="card-body">
+          <div class="display-6 text-info mb-3">👤</div>
+          <h5 class="card-title">Ver Perfil</h5>
+          <p class="card-text">Consulta tu información personal y rol en la cooperativa.</p>
+          <a href="ver_perfil.html" class="btn btn-outline-info">Ver Perfil</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="js/includes.js"></script>
+<!-- Footer importado -->
+<div id="footer"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/includes.js"></script>
+
+<script>
+// Variables para tipo de cambio en index
+let tipoCambioIndex = {
+  usd: { compra: 0, venta: 0 },
+  eur: { compra: 0, venta: 0 },
+  ultimaActualizacion: null
+};
+
+// Función para actualizar tipo de cambio en index
+async function actualizarTipoCambioIndex() {
+  try {
+    // Mostrar estado de carga
+    document.getElementById('index-estado-actualizacion').innerHTML = '🔄 Actualizando...';
+    
+    const response = await fetch('/api/tipo-cambio');
+    const apiResponse = await response.json();
+    
+    console.log('📡 Respuesta API index:', apiResponse);
+    
+    // La estructura es: { data: { success: true, data: { compra, venta } }, lastUpdate, services }
+    if (apiResponse.data && apiResponse.data.success && apiResponse.data.data) {
+      const tipoCambioData = apiResponse.data.data;
+      
+      // USD del BCCR
+      tipoCambioIndex.usd = {
+        compra: tipoCambioData.compra,
+        venta: tipoCambioData.venta
+      };
+      
+      // EUR calculado (USD + 2%)
+      tipoCambioIndex.eur = {
+        compra: Math.round(tipoCambioData.compra * 1.02 * 100) / 100,
+        venta: Math.round(tipoCambioData.venta * 1.02 * 100) / 100
+      };
+      
+      tipoCambioIndex.ultimaActualizacion = new Date().toLocaleString();
+      
+      console.log('💱 Tipo de cambio actualizado en index:', tipoCambioIndex);
+      
+      // Actualizar elementos del index
+      document.getElementById('index-usd-compra').textContent = `₡${tipoCambioIndex.usd.compra.toFixed(0)}`;
+      document.getElementById('index-usd-venta').textContent = `₡${tipoCambioIndex.usd.venta.toFixed(0)}`;
+      document.getElementById('index-eur-compra').textContent = `₡${tipoCambioIndex.eur.compra.toFixed(0)}`;
+      document.getElementById('index-eur-venta').textContent = `₡${tipoCambioIndex.eur.venta.toFixed(0)}`;
+      document.getElementById('index-ultima-actualizacion').textContent = tipoCambioIndex.ultimaActualizacion;
+      document.getElementById('index-estado-actualizacion').innerHTML = '✅ Actualizado';
+      
+    } else {
+      console.error('❌ Estructura de datos inesperada en index:', apiResponse);
+      throw new Error('No se recibieron datos válidos');
+    }
+  } catch (error) {
+    console.error('Error al obtener tipo de cambio para index:', error);
+    
+    // Mostrar error en la interfaz
+    ['index-usd-compra', 'index-usd-venta', 'index-eur-compra', 'index-eur-venta'].forEach(id => {
+      const elem = document.getElementById(id);
+      if (elem) elem.textContent = 'N/A';
+    });
+    
+    document.getElementById('index-estado-actualizacion').innerHTML = '❌ Error';
+    document.getElementById('index-ultima-actualizacion').textContent = 'No disponible';
+  }
+}
+
+// Inicializar al cargar la página
+document.addEventListener('DOMContentLoaded', function() {
+  // Cargar tipo de cambio inmediatamente
+  actualizarTipoCambioIndex();
+  
+  // Actualizar cada 5 minutos
+  setInterval(actualizarTipoCambioIndex, 5 * 60 * 1000);
+});
+</script>
 </body>
 </html>

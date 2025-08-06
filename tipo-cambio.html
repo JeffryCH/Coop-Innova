@@ -33,7 +33,13 @@
     </style>
 </head>
 <body>
-    <div class="container mt-5">
+    <!-- Navbar importado -->
+    <div id="navbar"></div>
+    
+    <!-- Modal de conversión importado -->
+    <div id="modal-conversion-container"></div>
+    
+    <div class="container mt-5" style="padding-top: 80px;">
         <h1 class="text-center mb-4">💱 Tipo de Cambio - Banco Popular</h1>
         
         <div class="row justify-content-center">
@@ -84,24 +90,30 @@
             
             try {
                 const response = await fetch('/api/tipo-cambio');
-                const data = await response.json();
+                const apiResponse = await response.json();
                 
-                if (data.data) {
+                console.log('📡 Respuesta API tipo-cambio:', apiResponse);
+                
+                // La estructura es: { data: { success: true, data: { compra, venta } }, lastUpdate, services }
+                if (apiResponse.data && apiResponse.data.success && apiResponse.data.data) {
+                    const tipoCambioData = apiResponse.data.data;
+                    
                     // Actualizar valores
-                    document.getElementById('compra').textContent = `₡${data.data.compra.toFixed(2)}`;
-                    document.getElementById('venta').textContent = `₡${data.data.venta.toFixed(2)}`;
+                    document.getElementById('compra').textContent = `₡${tipoCambioData.compra.toFixed(2)}`;
+                    document.getElementById('venta').textContent = `₡${tipoCambioData.venta.toFixed(2)}`;
                     
                     // Actualizar tiempo
-                    const fecha = new Date(data.lastUpdate);
+                    const fecha = new Date(apiResponse.lastUpdate);
                     document.getElementById('ultimaActualizacion').textContent = 
                         `Última actualización: ${fecha.toLocaleString('es-CR')}`;
                     
                     // Mostrar si son datos simulados
-                    if (data.data.simulated) {
+                    if (apiResponse.data.simulated) {
                         document.getElementById('ultimaActualizacion').innerHTML += 
                             '<br><span class="badge bg-warning">⚠️ Datos simulados (BCCR no disponible)</span>';
                     }
                 } else {
+                    console.error('❌ Estructura de datos inesperada en tipo-cambio:', apiResponse);
                     throw new Error('No se pudieron obtener los datos');
                 }
                 
@@ -139,5 +151,8 @@
             actualizandoAuto = !document.hidden;
         });
     </script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/includes.js"></script>
 </body>
 </html>

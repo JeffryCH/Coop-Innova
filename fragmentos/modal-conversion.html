@@ -1,73 +1,351 @@
 <!-- Modal de Conversión de Monedas -->
-<div id="modal-conversion" class="modal-conversion-bg" role="dialog" aria-modal="true" aria-labelledby="modalConversionTitle" tabindex="-1" style="display:none;">
-  <div class="modal-conversion-content" role="document">
-    <button class="modal-conversion-close" aria-label="Cerrar" tabindex="0">&times;</button>
-    <h2 id="modalConversionTitle" class="modal-conversion-title">
-      <span style="vertical-align:middle; font-size:1.5em; color:#0d6efd; margin-right:8px;">&#128176;</span>
-      Conversor de Monedas
-    </h2>
-    <!-- Cuadro visual de tasas de cambio -->
-    <div id="conversion-tasas" class="conversion-tasas-box" aria-live="polite" style="margin-bottom:1.2em;">
-      <div class="conversion-tasas-title" style="font-weight:600; font-size:1.1em; color:#0d6efd; margin-bottom:0.5em;">Tipo de cambio actual</div>
-      <div class="conversion-tasas-grid" style="display:flex; gap:1.5em; justify-content:center;">
-        <div class="conversion-tasa-item" style="background:#f8f9fa; border-radius:10px; padding:1em 1.2em; box-shadow:0 1px 4px #0001; min-width:120px;">
-          <span class="conversion-tasa-moneda" style="font-weight:700; color:#0d6efd; font-size:1.1em;">USD</span>
-          <div class="conversion-tasa-cuadros" style="margin-top:0.5em;">
-            <div class="conversion-tasa-cuadro" style="margin-bottom:0.3em;">
-              <span class="conversion-tasa-label" style="font-size:0.95em;">Venta</span>
-              <span id="tasa-usd-venta" class="conversion-tasa-valor" style="font-weight:600; margin-left:0.5em;">--</span>
+<div id="modal-conversion" class="modal fade" tabindex="-1" aria-labelledby="modalConversionLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="modalConversionLabel">💱 Conversor de Monedas</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Tipo de cambio actual -->
+        <div class="row mb-4">
+          <div class="col-md-6">
+            <div class="card bg-light">
+              <div class="card-body text-center">
+                <h6 class="card-title">💵 USD - Dólar</h6>
+                <div class="d-flex justify-content-between">
+                  <div>
+                    <small class="text-muted">Compra</small><br>
+                    <span id="modal-usd-compra" class="fw-bold text-success">₡--</span>
+                  </div>
+                  <div>
+                    <small class="text-muted">Venta</small><br>
+                    <span id="modal-usd-venta" class="fw-bold text-danger">₡--</span>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div class="conversion-tasa-cuadro">
-              <span class="conversion-tasa-label" style="font-size:0.95em;">Compra</span>
-              <span id="tasa-usd-compra" class="conversion-tasa-valor" style="font-weight:600; margin-left:0.5em;">--</span>
+          </div>
+          <div class="col-md-6">
+            <div class="card bg-light">
+              <div class="card-body text-center">
+                <h6 class="card-title">💶 EUR - Euro</h6>
+                <div class="d-flex justify-content-between">
+                  <div>
+                    <small class="text-muted">Compra</small><br>
+                    <span id="modal-eur-compra" class="fw-bold text-success">₡--</span>
+                  </div>
+                  <div>
+                    <small class="text-muted">Venta</small><br>
+                    <span id="modal-eur-venta" class="fw-bold text-danger">₡--</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-        <div class="conversion-tasa-item" style="background:#f8f9fa; border-radius:10px; padding:1em 1.2em; box-shadow:0 1px 4px #0001; min-width:120px;">
-          <span class="conversion-tasa-moneda" style="font-weight:700; color:#198754; font-size:1.1em;">EUR</span>
-          <div class="conversion-tasa-cuadros" style="margin-top:0.5em;">
-            <div class="conversion-tasa-cuadro" style="margin-bottom:0.3em;">
-              <span class="conversion-tasa-label" style="font-size:0.95em;">Venta</span>
-              <span id="tasa-eur-venta" class="conversion-tasa-valor" style="font-weight:600; margin-left:0.5em;">--</span>
+
+        <!-- Conversor -->
+        <div class="card">
+          <div class="card-header bg-secondary text-white">
+            <h6 class="mb-0">🔄 Calculadora de Conversión</h6>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6">
+                <label class="form-label">Desde:</label>
+                <div class="input-group mb-3">
+                  <input type="number" id="cantidad-origen" class="form-control" placeholder="0.00" min="0" step="0.01">
+                  <select id="moneda-origen" class="form-select">
+                    <option value="CRC">₡ Colones</option>
+                    <option value="USD">💵 USD</option>
+                    <option value="EUR">💶 EUR</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Hacia:</label>
+                <div class="input-group mb-3">
+                  <input type="number" id="cantidad-destino" class="form-control" placeholder="0.00" readonly>
+                  <select id="moneda-destino" class="form-select">
+                    <option value="CRC">₡ Colones</option>
+                    <option value="USD">💵 USD</option>
+                    <option value="EUR">💶 EUR</option>
+                  </select>
+                </div>
+              </div>
             </div>
-            <div class="conversion-tasa-cuadro">
-              <span class="conversion-tasa-label" style="font-size:0.95em;">Compra</span>
-              <span id="tasa-eur-compra" class="conversion-tasa-valor" style="font-weight:600; margin-left:0.5em;">--</span>
+            
+            <div class="text-center">
+              <button type="button" class="btn btn-primary" onclick="realizarConversion()">
+                🔄 Convertir
+              </button>
+              <button type="button" class="btn btn-secondary ms-2" onclick="intercambiarMonedas()">
+                ⇄ Intercambiar
+              </button>
+              <button type="button" class="btn btn-outline-secondary ms-2" onclick="limpiarConversion()">
+                🗑️ Limpiar
+              </button>
+            </div>
+
+            <!-- Resultado detallado -->
+            <div id="resultado-conversion" class="mt-3" style="display: none;">
+              <div class="alert alert-info">
+                <h6>📊 Detalle de la conversión:</h6>
+                <div id="detalle-conversion"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Historial rápido -->
+        <div class="card mt-3">
+          <div class="card-header">
+            <h6 class="mb-0">⚡ Conversiones Rápidas</h6>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-4">
+                <div class="text-center p-2 border rounded">
+                  <small class="text-muted">$100 USD =</small><br>
+                  <span id="quick-100usd" class="fw-bold">₡--</span>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="text-center p-2 border rounded">
+                  <small class="text-muted">€100 EUR =</small><br>
+                  <span id="quick-100eur" class="fw-bold">₡--</span>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="text-center p-2 border rounded">
+                  <small class="text-muted">₡100,000 =</small><br>
+                  <span id="quick-100000crc" class="fw-bold">$--</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
-      <div id="conversion-tasas-error" class="conversion-tasas-error" style="display:none; margin-top:1em; color:#dc3545; font-weight:500; text-align:center;">
-        <span>
-          Tipo de cambio USD y EUR no disponibles. No es posible realizar conversiones.
-        </span>
+      <div class="modal-footer">
+        <small class="text-muted me-auto">
+          📈 Datos del BCCR | 🕒 Actualizado: <span id="ultima-actualizacion">--</span>
+        </small>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
       </div>
     </div>
-    <form id="conversion-form" autocomplete="off" style="margin-top:0.5em;">
-      <div class="modal-conversion-row" style="display:flex; align-items:center; gap:0.7em; margin-bottom:1em;">
-        <label for="conversion-amount" style="min-width:70px;">Cantidad</label>
-        <input type="number" id="conversion-amount" name="amount" min="0" step="any" required aria-required="true" autocomplete="off" style="flex:1; padding:0.5em; border-radius:6px; border:1px solid #ced4da;" />
-      </div>
-      <div class="modal-conversion-row" style="display:flex; align-items:center; gap:0.7em; margin-bottom:1em;">
-        <label for="conversion-from" style="min-width:40px;">De</label>
-        <select id="conversion-from" name="from" required aria-required="true" style="padding:0.4em 0.7em; border-radius:6px; border:1px solid #ced4da;">
-          <option value="CRC">Colón (CRC)</option>
-          <option value="USD">Dólar (USD)</option>
-          <option value="EUR">Euro (EUR)</option>
-        </select>
-        <button type="button" id="conversion-swap" class="modal-conversion-swap" aria-label="Invertir monedas" tabindex="0" style="background:#e9ecef; border:none; border-radius:50%; width:2.2em; height:2.2em; font-size:1.2em; cursor:pointer; transition:background 0.2s;">&#8646;</button>
-        <label for="conversion-to" style="min-width:20px;">A</label>
-        <select id="conversion-to" name="to" required aria-required="true" style="padding:0.4em 0.7em; border-radius:6px; border:1px solid #ced4da;">
-          <option value="USD">Dólar (USD)</option>
-          <option value="CRC">Colón (CRC)</option>
-          <option value="EUR">Euro (EUR)</option>
-        </select>
-      </div>
-      <div class="modal-conversion-row" style="text-align:center; margin-bottom:1em;">
-        <button type="submit" class="modal-conversion-submit" style="background:#0d6efd; color:#fff; border:none; border-radius:6px; padding:0.7em 2.2em; font-size:1.1em; font-weight:600; cursor:pointer; transition:background 0.2s;">Convertir</button>
-      </div>
-      <div id="conversion-result" class="modal-conversion-result" aria-live="polite" style="margin-bottom:0.5em; text-align:center;"></div>
-      <div id="conversion-error" class="modal-conversion-error" aria-live="assertive" style="color:#dc3545; text-align:center;"></div>
-    </form>
   </div>
 </div>
+
+<script>
+// Variables globales para el modal
+let tipoCambioModal = {
+  usd: { compra: 0, venta: 0 },
+  eur: { compra: 0, venta: 0 },
+  ultimaActualizacion: null
+};
+
+// Función para mostrar el modal
+function mostrarModalConversion() {
+  actualizarTipoCambioModal();
+  const modal = new bootstrap.Modal(document.getElementById('modal-conversion'));
+  modal.show();
+}
+
+// Actualizar tipo de cambio en el modal
+async function actualizarTipoCambioModal() {
+  try {
+    const response = await fetch('/api/tipo-cambio');
+    const apiResponse = await response.json();
+    
+    console.log('📡 Respuesta API modal:', apiResponse);
+    
+    // La estructura es: { data: { success: true, data: { compra, venta } }, lastUpdate, services }
+    if (apiResponse.data && apiResponse.data.success && apiResponse.data.data) {
+      const tipoCambioData = apiResponse.data.data;
+      
+      // USD del BCCR
+      tipoCambioModal.usd = {
+        compra: tipoCambioData.compra,
+        venta: tipoCambioData.venta
+      };
+      
+      // EUR calculado (USD + 2%)
+      tipoCambioModal.eur = {
+        compra: Math.round(tipoCambioData.compra * 1.02 * 100) / 100,
+        venta: Math.round(tipoCambioData.venta * 1.02 * 100) / 100
+      };
+      
+      tipoCambioModal.ultimaActualizacion = new Date().toLocaleString();
+      
+      console.log('💱 Tipo de cambio actualizado en modal:', tipoCambioModal);
+      
+      // Actualizar interfaz del modal
+      actualizarInterfazModal();
+      calcularConversionesRapidas();
+    } else {
+      console.error('❌ Estructura de datos inesperada en modal:', apiResponse);
+      throw new Error('Datos no válidos en la respuesta');
+    }
+  } catch (error) {
+    console.error('Error al obtener tipo de cambio para modal:', error);
+  }
+}
+
+// Actualizar interfaz del modal
+function actualizarInterfazModal() {
+  document.getElementById('modal-usd-compra').textContent = `₡${tipoCambioModal.usd.compra.toFixed(0)}`;
+  document.getElementById('modal-usd-venta').textContent = `₡${tipoCambioModal.usd.venta.toFixed(0)}`;
+  document.getElementById('modal-eur-compra').textContent = `₡${tipoCambioModal.eur.compra.toFixed(0)}`;
+  document.getElementById('modal-eur-venta').textContent = `₡${tipoCambioModal.eur.venta.toFixed(0)}`;
+  document.getElementById('ultima-actualizacion').textContent = tipoCambioModal.ultimaActualizacion || '--';
+}
+
+// Realizar conversión
+function realizarConversion() {
+  const cantidadOrigen = parseFloat(document.getElementById('cantidad-origen').value);
+  const monedaOrigen = document.getElementById('moneda-origen').value;
+  const monedaDestino = document.getElementById('moneda-destino').value;
+  
+  if (!cantidadOrigen || cantidadOrigen <= 0) {
+    alert('Por favor ingrese una cantidad válida');
+    return;
+  }
+  
+  if (monedaOrigen === monedaDestino) {
+    document.getElementById('cantidad-destino').value = cantidadOrigen.toFixed(2);
+    mostrarDetalleConversion(cantidadOrigen, monedaOrigen, cantidadOrigen, monedaDestino, 1);
+    return;
+  }
+  
+  let resultado = 0;
+  let tasa = 0;
+  let tipoOperacion = '';
+  
+  // Conversiones desde CRC
+  if (monedaOrigen === 'CRC') {
+    if (monedaDestino === 'USD') {
+      tasa = tipoCambioModal.usd.compra;
+      resultado = cantidadOrigen / tasa;
+      tipoOperacion = 'compra USD';
+    } else if (monedaDestino === 'EUR') {
+      tasa = tipoCambioModal.eur.compra;
+      resultado = cantidadOrigen / tasa;
+      tipoOperacion = 'compra EUR';
+    }
+  }
+  // Conversiones desde USD
+  else if (monedaOrigen === 'USD') {
+    if (monedaDestino === 'CRC') {
+      tasa = tipoCambioModal.usd.venta;
+      resultado = cantidadOrigen * tasa;
+      tipoOperacion = 'venta USD';
+    } else if (monedaDestino === 'EUR') {
+      // USD a EUR vía CRC
+      const colones = cantidadOrigen * tipoCambioModal.usd.venta;
+      tasa = tipoCambioModal.eur.compra;
+      resultado = colones / tasa;
+      tipoOperacion = 'USD→CRC→EUR';
+    }
+  }
+  // Conversiones desde EUR
+  else if (monedaOrigen === 'EUR') {
+    if (monedaDestino === 'CRC') {
+      tasa = tipoCambioModal.eur.venta;
+      resultado = cantidadOrigen * tasa;
+      tipoOperacion = 'venta EUR';
+    } else if (monedaDestino === 'USD') {
+      // EUR a USD vía CRC
+      const colones = cantidadOrigen * tipoCambioModal.eur.venta;
+      tasa = tipoCambioModal.usd.compra;
+      resultado = colones / tasa;
+      tipoOperacion = 'EUR→CRC→USD';
+    }
+  }
+  
+  document.getElementById('cantidad-destino').value = resultado.toFixed(2);
+  mostrarDetalleConversion(cantidadOrigen, monedaOrigen, resultado, monedaDestino, tasa, tipoOperacion);
+}
+
+// Mostrar detalle de conversión
+function mostrarDetalleConversion(origen, monedaOrigen, destino, monedaDestino, tasa, operacion) {
+  const simbolos = { CRC: '₡', USD: '$', EUR: '€' };
+  
+  let detalle = `
+    <strong>${simbolos[monedaOrigen]}${origen.toLocaleString()} ${monedaOrigen}</strong> = 
+    <strong class="text-primary">${simbolos[monedaDestino]}${destino.toLocaleString()} ${monedaDestino}</strong>
+  `;
+  
+  if (operacion && tasa) {
+    detalle += `<br><small class="text-muted">Operación: ${operacion} | Tasa: ₡${tasa.toLocaleString()}</small>`;
+  }
+  
+  document.getElementById('detalle-conversion').innerHTML = detalle;
+  document.getElementById('resultado-conversion').style.display = 'block';
+}
+
+// Intercambiar monedas
+function intercambiarMonedas() {
+  const origenSelect = document.getElementById('moneda-origen');
+  const destinoSelect = document.getElementById('moneda-destino');
+  
+  const temp = origenSelect.value;
+  origenSelect.value = destinoSelect.value;
+  destinoSelect.value = temp;
+  
+  // Intercambiar cantidades si hay valores
+  const cantidadOrigen = document.getElementById('cantidad-origen').value;
+  const cantidadDestino = document.getElementById('cantidad-destino').value;
+  
+  if (cantidadDestino) {
+    document.getElementById('cantidad-origen').value = cantidadDestino;
+    document.getElementById('cantidad-destino').value = '';
+    realizarConversion();
+  }
+}
+
+// Limpiar conversión
+function limpiarConversion() {
+  document.getElementById('cantidad-origen').value = '';
+  document.getElementById('cantidad-destino').value = '';
+  document.getElementById('resultado-conversion').style.display = 'none';
+}
+
+// Calcular conversiones rápidas
+function calcularConversionesRapidas() {
+  if (tipoCambioModal.usd.venta > 0) {
+    document.getElementById('quick-100usd').textContent = `₡${(100 * tipoCambioModal.usd.venta).toLocaleString()}`;
+    document.getElementById('quick-100000crc').textContent = `$${(100000 / tipoCambioModal.usd.compra).toFixed(2)}`;
+  }
+  
+  if (tipoCambioModal.eur.venta > 0) {
+    document.getElementById('quick-100eur').textContent = `₡${(100 * tipoCambioModal.eur.venta).toLocaleString()}`;
+  }
+}
+
+// Event listeners
+document.addEventListener('DOMContentLoaded', function() {
+  // Auto-conversión al escribir
+  document.getElementById('cantidad-origen').addEventListener('input', function() {
+    if (this.value) {
+      realizarConversion();
+    } else {
+      document.getElementById('cantidad-destino').value = '';
+      document.getElementById('resultado-conversion').style.display = 'none';
+    }
+  });
+  
+  // Auto-conversión al cambiar monedas
+  document.getElementById('moneda-origen').addEventListener('change', function() {
+    if (document.getElementById('cantidad-origen').value) {
+      realizarConversion();
+    }
+  });
+  
+  document.getElementById('moneda-destino').addEventListener('change', function() {
+    if (document.getElementById('cantidad-origen').value) {
+      realizarConversion();
+    }
+  });
+});
+</script>

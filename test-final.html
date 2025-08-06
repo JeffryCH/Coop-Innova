@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Final - Coop-Innova</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navbar -->
+    <div id="navbar"></div>
+    
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="alert alert-success">
+                    <h4>✅ Test Final - Todo Funcionando</h4>
+                    <p><strong>API:</strong> <span id="api-status">Verificando...</span></p>
+                    <p><strong>Navbar:</strong> <span id="navbar-status">Verificando...</span></p>
+                    <p><strong>Modal:</strong> <span id="modal-status">Verificando...</span></p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>💰 Valores Actuales</h5>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>USD Compra:</strong> <span id="usd-compra">--</span></p>
+                        <p><strong>USD Venta:</strong> <span id="usd-venta">--</span></p>
+                        <p><strong>EUR Compra:</strong> <span id="eur-compra">--</span></p>
+                        <p><strong>EUR Venta:</strong> <span id="eur-venta">--</span></p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>🧪 Pruebas</h5>
+                    </div>
+                    <div class="card-body">
+                        <button id="test-api" class="btn btn-primary mb-2">🌐 Test API</button><br>
+                        <button id="test-navbar" class="btn btn-info mb-2">🔄 Test Navbar</button><br>
+                        <button id="test-modal" class="btn btn-success">💱 Test Modal</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal de conversión -->
+    <div id="modal-conversion-container"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/includes.js"></script>
+    
+    <script>
+        let testResults = {
+            api: false,
+            navbar: false,
+            modal: false
+        };
+        
+        function updateStatus() {
+            document.getElementById('api-status').textContent = testResults.api ? '✅ OK' : '❌ Error';
+            document.getElementById('navbar-status').textContent = testResults.navbar ? '✅ OK' : '❌ Error';
+            document.getElementById('modal-status').textContent = testResults.modal ? '✅ OK' : '❌ Error';
+        }
+        
+        function updateValues() {
+            const elementos = ['navbar-usd-compra', 'navbar-usd-venta', 'navbar-eur-compra', 'navbar-eur-venta'];
+            const targets = ['usd-compra', 'usd-venta', 'eur-compra', 'eur-venta'];
+            
+            elementos.forEach((id, index) => {
+                const elem = document.getElementById(id);
+                const target = document.getElementById(targets[index]);
+                if (elem && target) {
+                    target.textContent = elem.textContent || '--';
+                    if (elem.textContent && elem.textContent !== '--' && elem.textContent !== 'N/A') {
+                        testResults.navbar = true;
+                    }
+                }
+            });
+            
+            updateStatus();
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 [TEST-FINAL] DOM cargado, iniciando tests...');
+            
+            // Configurar botones
+            document.getElementById('test-api').addEventListener('click', async function() {
+                console.log('🧪 [TEST] Iniciando test de API...');
+                try {
+                    const response = await fetch('/api/tipo-cambio');
+                    const data = await response.json();
+                    console.log('📦 [TEST] API Response:', data);
+                    
+                    if (data && data.data && data.data.success && data.data.data) {
+                        testResults.api = true;
+                        alert('✅ API funcionando correctamente\n\nUSD: ₡' + data.data.data.compra + ' / ₡' + data.data.data.venta);
+                    } else {
+                        testResults.api = false;
+                        alert('❌ API responde pero datos inválidos');
+                    }
+                } catch (error) {
+                    console.error('❌ [TEST] Error de API:', error);
+                    testResults.api = false;
+                    alert('❌ Error de API: ' + error.message);
+                }
+                updateStatus();
+            });
+            
+            // Test Navbar
+            document.getElementById('test-navbar').addEventListener('click', function() {
+                console.log('🧪 [TEST] Iniciando test de navbar...');
+                
+                // Verificar funciones disponibles
+                console.log('🔍 [TEST] Funciones disponibles:');
+                console.log('   - window.forzarActualizacionNavbar:', typeof window.forzarActualizacionNavbar);
+                console.log('   - window.verificarEstadoNavbar:', typeof window.verificarEstadoNavbar);
+                console.log('   - window.abrirConversor:', typeof window.abrirConversor);
+                
+                if (typeof window.verificarEstadoNavbar === 'function') {
+                    window.verificarEstadoNavbar();
+                }
+                
+                if (typeof window.forzarActualizacionNavbar === 'function') {
+                    console.log('✅ [TEST] Ejecutando forzarActualizacionNavbar...');
+                    window.forzarActualizacionNavbar();
+                    setTimeout(() => {
+                        updateValues();
+                        alert('🔄 Navbar actualizado - Revisa los valores');
+                    }, 3000);
+                } else {
+                    console.error('❌ [TEST] Función de navbar no disponible');
+                    alert('❌ Función de navbar no disponible\n\nRevisa la consola para más detalles');
+                }
+            });
+            
+            // Test Modal
+            document.getElementById('test-modal').addEventListener('click', function() {
+                if (typeof abrirConversor === 'function') {
+                    abrirConversor();
+                    testResults.modal = true;
+                    updateStatus();
+                } else {
+                    alert('❌ Función de modal no disponible');
+                }
+            });
+            
+            // Verificación automática cada 3 segundos
+            setInterval(updateValues, 3000);
+            
+            // Verificación inicial después de cargar
+            setTimeout(() => {
+                console.log('⏰ [TEST] Verificación inicial tras 3 segundos...');
+                updateValues();
+            }, 3000);
+            
+            // Monitoreo continuo de funciones disponibles
+            let monitoreoIntervalo = setInterval(() => {
+                const funcionDisponible = typeof window.forzarActualizacionNavbar === 'function';
+                if (funcionDisponible && !testResults.navbar) {
+                    console.log('🎉 [TEST] ¡Función de navbar ahora disponible!');
+                    clearInterval(monitoreoIntervalo);
+                    // Ejecutar automáticamente
+                    setTimeout(() => {
+                        console.log('🔄 [TEST] Ejecutando actualización automática...');
+                        window.forzarActualizacionNavbar();
+                    }, 1000);
+                }
+            }, 1000);
+            
+            // Detener monitoreo después de 30 segundos
+            setTimeout(() => {
+                clearInterval(monitoreoIntervalo);
+                console.log('⏱️ [TEST] Monitoreo detenido después de 30 segundos');
+            }, 30000);
+        });
+    </script>
+</body>
+</html>

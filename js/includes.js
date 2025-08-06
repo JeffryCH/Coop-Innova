@@ -1,98 +1,120 @@
 document.addEventListener("DOMContentLoaded", () => {
+  console.log('🚀 [INCLUDES] Iniciando carga de fragmentos...');
+  
   includeHTML("navbar", "fragmentos/navbar.html", () => {
-    initTipoCambioNavbar(() => {
+    console.log('✅ [INCLUDES] Navbar cargado, inicializando...');
+    
+    // Esperar a que los scripts se ejecuten completamente
+    setTimeout(() => {
       const loader = document.getElementById("loader-bg");
       if (loader) {
         loader.classList.add("hide");
         setTimeout(() => loader.remove(), 500);
       }
-    });
+      
+      // Verificar múltiples veces si la función está disponible
+      let intentos = 0;
+      const verificarFuncion = () => {
+        intentos++;
+        console.log(`🔍 [INCLUDES] Intento ${intentos} - Verificando función navbar...`);
+        
+        if (typeof window.forzarActualizacionNavbar === 'function') {
+          console.log('🎯 [INCLUDES] ✅ Función encontrada, ejecutando actualización inicial...');
+          window.forzarActualizacionNavbar();
+        } else if (intentos < 10) {
+          console.warn(`⚠️ [INCLUDES] Función no disponible aún, reintentando en 500ms... (${intentos}/10)`);
+          setTimeout(verificarFuncion, 500);
+        } else {
+          console.error('❌ [INCLUDES] Función de navbar no disponible después de 10 intentos');
+        }
+      };
+      
+      verificarFuncion();
+    }, 2000);
   });
-  includeHTML("footer", "fragmentos/footer.html");
+  
+  includeHTML("footer", "fragmentos/footer.html", () => {
+    console.log('✅ [INCLUDES] Footer cargado');
+  });
+  
+  includeHTML("modal-conversion-container", "fragmentos/modal-conversion.html", () => {
+    console.log('✅ [INCLUDES] Modal de conversión cargado');
+  });
 });
 
-// Hook para actualizar tipo de cambio al abrir el modal
-let _originalMostrarModalConversion = typeof mostrarModalConversion === "function" ? mostrarModalConversion : null;
-window.mostrarModalConversion = function() {
-  if (_originalMostrarModalConversion) _originalMostrarModalConversion();
-  actualizarTipoCambioModal();
-};
-
-/**
- * Obtiene y muestra el tipo de cambio CRC/USD y CRC/EUR usando open.er-api.com
- * Muestra ambos valores en el navbar con animación cíclica (fade).
- * Si hay error, muestra "No disponible".
- * Ejecuta solo cuando el navbar está cargado.
- */
-function initTipoCambioNavbar(callback) {
-  const tcDiv = document.getElementById("tipo-cambio-bccr");
-  if (!tcDiv) {
+function includeHTML(elementId, filePath, callback) {
+  const element = document.getElementById(elementId);
+  if (!element) {
+    console.warn(`❌ Elemento con ID '${elementId}' no encontrado`);
     if (typeof callback === "function") callback();
     return;
   }
 
-  // Asegura el span para el texto animado
-  let span = tcDiv.querySelector(".tipo-cambio-text");
-  if (!span) {
-    span = document.createElement("span");
-    span.className = "tipo-cambio-text";
-    tcDiv.innerHTML = "";
-    tcDiv.appendChild(span);
-  }
+  console.log(`📄 Cargando ${filePath}...`);
 
-  // Fetch tipo de cambio USD desde backend Flask
-  fetch("http://localhost:5000/api/tipo-cambio-popular")
-    .then(resp => {
-      if (resp.ok) {
-        return resp.json();
-      } else {
-        return Promise.reject(new Error("Respuesta no OK"));
+  fetch(filePath)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
+      return response.text();
     })
-    .then(data => {
-      // data: { compra: float, venta: float }
-      const compra = data && typeof data.compra === "number" ? data.compra : null;
-      const venta = data && typeof data.venta === "number" ? data.venta : null;
-      const valores = [];
-      if (compra !== null) valores.push(`💵 USD Compra: ₡${compra}`);
-      if (venta !== null) valores.push(`💵 USD Venta: ₡${venta}`);
-      // Calcular y mostrar EUR Venta y EUR Compra siempre que exista al menos uno de los valores USD
-      let eurVenta = null, eurCompra = null;
-      if (venta !== null && !isNaN(venta)) {
-        eurVenta = +(venta * 1.148).toFixed(2);
-        valores.push(`💶 EUR Venta: ₡${eurVenta}`);
-        console.log("[NAVBAR] USD Venta:", venta, "EUR Venta (calculado):", eurVenta);
-      }
-      if (compra !== null && !isNaN(compra)) {
-        eurCompra = +(compra * 1.148).toFixed(2);
-        valores.push(`💶 EUR Compra: ₡${eurCompra}`);
-        console.log("[NAVBAR] USD Compra:", compra, "EUR Compra (calculado):", eurCompra);
-      }
-      if (eurVenta === null && eurCompra !== null) {
-        valores.push(`💶 EUR Venta: --`);
-        console.warn("[NAVBAR] EUR Venta no disponible, solo EUR Compra:", eurCompra);
-      }
-      if (eurCompra === null && eurVenta !== null) {
-        valores.push(`💶 EUR Compra: --`);
-        console.warn("[NAVBAR] EUR Compra no disponible, solo EUR Venta:", eurVenta);
-      }
-      if (valores.length === 0) throw new Error("No rates");
-      let idx = 0;
-      span.textContent = valores[0];
-      setInterval(() => {
-        span.classList.remove("fade-in");
-        span.classList.add("fade-out");
-        setTimeout(() => {
-          idx = (idx + 1) % valores.length;
-          span.textContent = valores[idx];
-          span.classList.remove("fade-out");
-          span.classList.add("fade-in");
-        }, 500);
-      }, 5000);
-      if (typeof callback === "function") callback();
+    .then(html => {
+      element.innerHTML = html;
+      
+      console.log(`📄 Contenido HTML insertado para ${elementId}`);
+      
+      // Ejecutar scripts contenidos en el HTML después de un delay
+      setTimeout(() => {
+        const scripts = element.querySelectorAll('script');
+        console.log(`🔧 Procesando ${scripts.length} scripts en ${elementId}`);
+        
+        scripts.forEach((script, index) => {
+          try {
+            const newScript = document.createElement('script');
+            
+            // Copiar atributos
+            Array.from(script.attributes).forEach(attr => {
+              newScript.setAttribute(attr.name, attr.value);
+            });
+            
+            if (script.src) {
+              newScript.src = script.src;
+              console.log(`📤 Script externo ${index + 1} agregado: ${script.src}`);
+            } else {
+              newScript.textContent = script.textContent;
+              console.log(`📝 Script inline ${index + 1} agregado (${script.textContent.length} chars)`);
+            }
+            
+            // Agregar al head y ejecutar
+            document.head.appendChild(newScript);
+            
+            // Remover el script inline después de ejecutarlo
+            if (!script.src) {
+              setTimeout(() => {
+                try {
+                  document.head.removeChild(newScript);
+                } catch (e) {
+                  // Ignorar errores de remoción
+                }
+              }, 100);
+            }
+            
+          } catch (error) {
+            console.error(`❌ Error ejecutando script ${index + 1} para ${elementId}:`, error);
+          }
+        });
+        
+        console.log(`✅ Scripts procesados para ${elementId}`);
+        
+        if (typeof callback === "function") {
+          setTimeout(callback, 200);
+        }
+      }, 200);
     })
-    .catch(() => {
-      tcDiv.innerHTML = "<span>No disponible</span>";
+    .catch(error => {
+      console.error(`❌ Error al cargar ${filePath}:`, error);
+      element.innerHTML = `<p>Error al cargar contenido</p>`;
       if (typeof callback === "function") callback();
     });
 }
@@ -215,9 +237,20 @@ async function setupConversionForm() {
   // Función para actualizar tasas visuales y cálculo de compra
   function actualizarTasas() {
     if (!tasaUSDVenta || !tasaUSDCompra || !tasaEURVenta || !tasaEURCompra) return;
-    // USD: usar Banco Popular (del backend)
-    let ventaUSD = tcBancoPopular.venta;
-    let compraUSD = tcBancoPopular.compra;
+    
+    // Intentar usar datos del navbar si están disponibles
+    let ventaUSD, compraUSD;
+    
+    if (window.tcBancoPopular && window.tcBancoPopular.venta && window.tcBancoPopular.compra) {
+      ventaUSD = window.tcBancoPopular.venta;
+      compraUSD = window.tcBancoPopular.compra;
+      console.log('📊 [MODAL] Usando datos del navbar:', { compraUSD, ventaUSD });
+    } else {
+      // Fallback a variables originales
+      ventaUSD = (typeof tcBancoPopular !== 'undefined') ? tcBancoPopular.venta : null;
+      compraUSD = (typeof tcBancoPopular !== 'undefined') ? tcBancoPopular.compra : null;
+      console.log('📊 [MODAL] Usando datos locales:', { compraUSD, ventaUSD });
+    }
 
     // Venta USD: lo que el banco vende (lo que paga el usuario por 1 USD)
     if (typeof ventaUSD === "number" && ventaUSD > 0) {
@@ -373,28 +406,36 @@ async function setupConversionForm() {
   }
 
   if (errorUSD && errorEUR) {
-    tasasError.style.display = "flex";
-    tasasError.innerHTML = `
-      <span>
-        Tipo de cambio USD y EUR no disponibles. No es posible realizar conversiones.
-      </span>
-    `;
+    if (tasasError) {
+      tasasError.style.display = "flex";
+      tasasError.innerHTML = `
+        <span>
+          Tipo de cambio USD y EUR no disponibles. No es posible realizar conversiones.
+        </span>
+      `;
+    }
   } else if (errorUSD) {
-    tasasError.style.display = "flex";
-    tasasError.innerHTML = `
-      <span>
-        Tipo de cambio USD no disponible. Puede usar la conversión solo para EUR.
-      </span>
-    `;
+    if (tasasError) {
+      tasasError.style.display = "flex";
+      tasasError.innerHTML = `
+        <span>
+          Tipo de cambio USD no disponible. Puede usar la conversión solo para EUR.
+        </span>
+      `;
+    }
   } else if (errorEUR) {
-    tasasError.style.display = "flex";
-    tasasError.innerHTML = `
-      <span>
-        Tipo de cambio EUR no disponible. Puede usar la conversión solo para USD.
-      </span>
-    `;
+    if (tasasError) {
+      tasasError.style.display = "flex";
+      tasasError.innerHTML = `
+        <span>
+          Tipo de cambio EUR no disponible. Puede usar la conversión solo para USD.
+        </span>
+      `;
+    }
   } else {
-    tasasError.style.display = "none";
+    if (tasasError) {
+      tasasError.style.display = "none";
+    }
   }
 
   // Habilitar/deshabilitar opciones según disponibilidad
@@ -490,6 +531,12 @@ async function setupConversionForm() {
     } else {
       errorDiv.textContent = "Conversión no soportada.";
     }
+  });
+
+  // Escuchar actualizaciones del navbar
+  window.addEventListener('tipoCambioActualizado', function(event) {
+    console.log('🔄 [MODAL] Recibiendo actualización del navbar:', event.detail);
+    actualizarTasas();
   });
 }
 

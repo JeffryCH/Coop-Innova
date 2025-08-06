@@ -100,57 +100,30 @@ async function actualizarTipoCambio() {
     // Obtener datos de la API
     console.log('🌐 [NAVBAR] Consultando API...');
     const response = await fetch('/api/tipo-cambio');
-    
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-    }
-    
     const data = await response.json();
-    console.log('📦 [NAVBAR] Respuesta completa:', data);
+    
+    console.log('📦 [NAVBAR] Respuesta:', data);
     
     if (data && data.data && data.data.success && data.data.data) {
       const rates = data.data.data;
-      console.log('💰 [NAVBAR] Datos extraídos:', rates);
       
-      // Actualizar variables globales para compatibilidad con modal
-      if (typeof window.tcBancoPopular === 'undefined') {
-        window.tcBancoPopular = {};
-      }
-      window.tcBancoPopular.compra = rates.compra;
-      window.tcBancoPopular.venta = rates.venta;
-      
-      // Actualizar USD en navbar
+      // Actualizar USD
       elementos.usdCompra.textContent = `₡${rates.compra}`;
       elementos.usdVenta.textContent = `₡${rates.venta}`;
       
-      // Calcular EUR (USD + 2% como en el modal)
+      // Calcular EUR (USD + 2%)
       const eurCompra = Math.round(rates.compra * 1.02);
       const eurVenta = Math.round(rates.venta * 1.02);
       
       elementos.eurCompra.textContent = `₡${eurCompra}`;
       elementos.eurVenta.textContent = `₡${eurVenta}`;
       
-      // Actualizar variables globales del navbar
-      window.tipoCambioNavbar = {
-        usd: { compra: rates.compra, venta: rates.venta },
-        eur: { compra: eurCompra, venta: eurVenta }
-      };
-      
-      console.log('✅ [NAVBAR] Actualizado exitosamente:', {
+      console.log('✅ [NAVBAR] Actualizado:', {
         usd: `₡${rates.compra}/₡${rates.venta}`,
         eur: `₡${eurCompra}/₡${eurVenta}`
       });
       
-      // Disparar evento personalizado para que otros componentes se actualicen
-      window.dispatchEvent(new CustomEvent('tipoCambioActualizado', {
-        detail: {
-          usd: { compra: rates.compra, venta: rates.venta },
-          eur: { compra: eurCompra, venta: eurVenta }
-        }
-      }));
-      
     } else {
-      console.error('❌ [NAVBAR] Estructura de datos inválida:', data);
       throw new Error('Datos inválidos de la API');
     }
     
@@ -186,31 +159,10 @@ if (document.readyState === 'loading') {
 }
 
 // Función global para forzar actualización
-window.forzarActualizacionNavbar = function() {
-  console.log('🔧 [NAVBAR] Función forzar actualización llamada');
-  actualizarTipoCambio();
-};
-
-// Función global para verificar estado
-window.verificarEstadoNavbar = function() {
-  console.log('🔍 [NAVBAR] Verificando estado...');
-  console.log('   - forzarActualizacionNavbar disponible:', typeof window.forzarActualizacionNavbar === 'function');
-  console.log('   - actualizarTipoCambio disponible:', typeof actualizarTipoCambio === 'function');
-  console.log('   - tipoCambioNavbar:', window.tipoCambioNavbar);
-  console.log('   - tcBancoPopular:', window.tcBancoPopular);
-  
-  const elementos = ['navbar-usd-compra', 'navbar-usd-venta', 'navbar-eur-compra', 'navbar-eur-venta'];
-  elementos.forEach(id => {
-    const elem = document.getElementById(id);
-    console.log(`   - ${id}:`, elem ? elem.textContent : 'NO ENCONTRADO');
-  });
-};
+window.forzarActualizacionNavbar = actualizarTipoCambio;
 
 // Actualizar cada 5 minutos
 setInterval(actualizarTipoCambio, 5 * 60 * 1000);
 
-console.log('✅ [NAVBAR] Script configurado completamente');
-console.log('🔧 [NAVBAR] Funciones globales registradas:');
-console.log('   - window.forzarActualizacionNavbar:', typeof window.forzarActualizacionNavbar);
-console.log('   - window.verificarEstadoNavbar:', typeof window.verificarEstadoNavbar);
+console.log('✅ [NAVBAR] Script configurado');
 </script>
