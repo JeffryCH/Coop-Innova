@@ -583,4 +583,71 @@ function actualizarTipoCambioModal() {
     });
 }
 
-// El resto del código permanece igual
+// Utilidades de sesión/auth
+window.Auth = {
+  estado: { loggedIn: false, user: null },
+  async cargarEstado() {
+    try {
+      const res = await fetch('php/session.php', { credentials: 'include' });
+      const data = await res.json();
+      this.estado = data;
+      return data;
+    } catch (e) { return { loggedIn: false }; }
+  },
+  async logout() {
+    try {
+      const res = await fetch('php/logout.php', { method: 'POST', credentials: 'include' });
+      return await res.json();
+    } catch (e) { return { success: false }; }
+  }
+};
+
+// Enriquecer navbar con estado de sesión una vez cargado
+(function enhanceNavbarWithAuth(){
+  const render = (user) => {
+    const menu = document.querySelector('#menu .navbar-nav');
+    if (!menu) return;
+    // Remover previos
+    const prev = menu.querySelectorAll('[data-auth-item]');
+    prev.forEach(n => n.remove());
+
+    if (user) {
+      const liUser = document.createElement('li');
+      liUser.className = 'nav-item dropdown';
+      liUser.setAttribute('data-auth-item','');
+      liUser.innerHTML = `
+        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">👋 ${user.nombre} (${user.rol})</a>
+        <ul class="dropdown-menu dropdown-menu-end">
+          <li><a class="dropdown-item" href="ver_perfil.html">Perfil</a></li>
+          <li><a class="dropdown-item" href="movimientos.html">Mis movimientos</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a id="btn-logout" class="dropdown-item" href="#">Cerrar sesión</a></li>
+        </ul>`;
+      menu.appendChild(liUser);
+
+      const btnLogout = liUser.querySelector('#btn-logout');
+      btnLogout?.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const resp = await Auth.logout();
+        if (resp.success) {
+          location.href = 'index.html';
+        }
+      });
+    } else {
+      const liLogin = document.createElement('li');
+      liLogin.className = 'nav-item';
+      liLogin.setAttribute('data-auth-item','');
+      liLogin.innerHTML = '<a class="nav-link" href="login.html">Iniciar sesión</a>';
+      menu.appendChild(liLogin);
+    }
+  };
+
+  // Esperar a que el navbar se cargue
+  const tryInit = async () => {
+    const menu = document.querySelector('#menu .navbar-nav');
+    if (!menu) { setTimeout(tryInit, 300); return; }
+    const estado = await Auth.cargarEstado();
+    render(estado.loggedIn ? estado.user : null);
+  };
+  tryInit();
+})();
