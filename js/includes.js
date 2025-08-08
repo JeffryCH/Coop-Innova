@@ -1,3 +1,48 @@
+// === Actualizar tipo de cambio en el navbar ===
+async function actualizarTipoCambioNavbar() {
+  try {
+    const compraEl = document.getElementById('navbar-usd-compra');
+    const ventaEl = document.getElementById('navbar-usd-venta');
+    const eurCompraEl = document.getElementById('navbar-eur-compra');
+    const eurVentaEl = document.getElementById('navbar-eur-venta');
+    if (!compraEl || !ventaEl || !eurCompraEl || !eurVentaEl) return;
+
+    const response = await fetch('/api/tipo-cambio');
+    const apiResponse = await response.json();
+    if (apiResponse.data && apiResponse.data.success && apiResponse.data.data) {
+      const tipoCambioData = apiResponse.data.data;
+      compraEl.textContent = `₡${tipoCambioData.compra.toFixed(0)}`;
+      ventaEl.textContent = `₡${tipoCambioData.venta.toFixed(0)}`;
+      // EUR calculado (USD + 2%)
+      eurCompraEl.textContent = `₡${Math.round(tipoCambioData.compra * 1.02)}`;
+      eurVentaEl.textContent = `₡${Math.round(tipoCambioData.venta * 1.02)}`;
+      // Guardar en variable global para otros módulos
+      window.tcBancoPopular = {
+        compra: tipoCambioData.compra,
+        venta: tipoCambioData.venta
+      };
+      // Disparar evento para otros componentes
+      window.dispatchEvent(new CustomEvent('tipoCambioActualizado', { detail: window.tcBancoPopular }));
+    } else {
+      compraEl.textContent = ventaEl.textContent = eurCompraEl.textContent = eurVentaEl.textContent = '--';
+    }
+  } catch (e) {
+    const compraEl = document.getElementById('navbar-usd-compra');
+    const ventaEl = document.getElementById('navbar-usd-venta');
+    const eurCompraEl = document.getElementById('navbar-eur-compra');
+    const eurVentaEl = document.getElementById('navbar-eur-venta');
+    if (compraEl) compraEl.textContent = '--';
+    if (ventaEl) ventaEl.textContent = '--';
+    if (eurCompraEl) eurCompraEl.textContent = '--';
+    if (eurVentaEl) eurVentaEl.textContent = '--';
+  }
+}
+
+// Ejecutar al cargar el navbar y cada 5 minutos
+window.forzarActualizacionNavbar = function() {
+  actualizarTipoCambioNavbar();
+  setInterval(actualizarTipoCambioNavbar, 5 * 60 * 1000);
+};
 document.addEventListener("DOMContentLoaded", () => {
   console.log('🚀 [INCLUDES] Iniciando carga de fragmentos...');
   
@@ -156,17 +201,20 @@ function cargarModalConversion(callback) {
 }
 
 function mostrarModalConversion() {
-  const modal = document.getElementById("modal-conversion");
+  actualizarTipoCambioModal();
+  const modal = document.getElementById('modal-conversion');
   if (!modal) return;
-  modal.style.display = "flex";
-  modal.setAttribute("aria-hidden", "false");
+  modal.style.display = 'flex';
+  modal.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+  // Centrar el modal y ajustar el fondo
+  modal.style.alignItems = 'center';
+  modal.style.justifyContent = 'center';
   // Focus en el input al abrir
   setTimeout(() => {
-    const input = modal.querySelector("#conversion-amount");
+    const input = document.getElementById('cantidad-origen');
     if (input) input.focus();
   }, 100);
-  // Bloquear scroll fondo
-  document.body.style.overflow = "hidden";
 }
 
 function cerrarModalConversion() {
@@ -540,47 +588,69 @@ async function setupConversionForm() {
   });
 }
 
-/**
- * Actualiza los elementos de tipo de cambio en el modal de conversión.
- * Llama al endpoint y muestra los valores o error.
- */
+function actualizarConversionesRapidas() {
+  const quickUSD = document.getElementById('quick-100usd');
+  const quickEUR = document.getElementById('quick-100eur');
+  const quickCRC = document.getElementById('quick-100000crc');
+  const usdVenta = parseFloat(document.getElementById('modal-usd-venta')?.textContent.replace(/[^\d.]/g, ''));
+  const eurVenta = parseFloat(document.getElementById('modal-eur-venta')?.textContent.replace(/[^\d.]/g, ''));
+  const usdCompra = parseFloat(document.getElementById('modal-usd-compra')?.textContent.replace(/[^\d.]/g, ''));
 
-function actualizarTipoCambioModal() {
-  const ventaEl = document.getElementById("tasa-usd-venta");
-  const compraEl = document.getElementById("tasa-usd-compra");
-  const ventaEUREl = document.getElementById("tasa-eur-venta");
-  const compraEUREl = document.getElementById("tasa-eur-compra");
-  if (!ventaEl || !compraEl || !ventaEUREl || !compraEUREl) return;
+  if (quickUSD && usdVenta > 0) {
+    quickUSD.textContent = `₡${(100 * usdVenta).toLocaleString()}`;
+  } else if (quickUSD) {
+    quickUSD.textContent = '--';
+  }
+  if (quickEUR && eurVenta > 0) {
+    quickEUR.textContent = `₡${(100 * eurVenta).toLocaleString()}`;
+  } else if (quickEUR) {
+    quickEUR.textContent = '--';
+  }
+  if (quickCRC && usdCompra > 0) {
+    quickCRC.textContent = `$${(100000 / usdCompra).toFixed(2)}`;
+  } else if (quickCRC) {
+    quickCRC.textContent = '--';
+  }
+}
 
-  ventaEl.textContent = "Cargando...";
-  compraEl.textContent = "Cargando...";
-  ventaEUREl.textContent = "Cargando...";
-  compraEUREl.textContent = "Cargando...";
+// Llamar a actualizarConversionesRapidas cada vez que se actualiza el tipo de cambio en el modal
+async function actualizarTipoCambioModal() {
+  try {
+    const compraEl = document.getElementById('modal-usd-compra');
+    const ventaEl = document.getElementById('modal-usd-venta');
+    const eurCompraEl = document.getElementById('modal-eur-compra');
+    const eurVentaEl = document.getElementById('modal-eur-venta');
+    const ultimaEl = document.getElementById('ultima-actualizacion');
+    if (!compraEl || !ventaEl || !eurCompraEl || !eurVentaEl || !ultimaEl) return;
 
-  fetch("http://localhost:5000/api/tipo-cambio-popular")
-    .then(resp => resp.ok ? resp.json() : Promise.reject())
-    .then(data => {
-      // Guardar en tcBancoPopular para que actualizarTasas() use los valores correctos
-      tcBancoPopular.compra = (data && typeof data.compra === "number") ? data.compra : null;
-      tcBancoPopular.venta = (data && typeof data.venta === "number") ? data.venta : null;
-
-      // Llamar a setupConversionForm solo si no se ha llamado antes
-      if (typeof setupConversionForm === "function") {
-        setupConversionForm();
-      }
-      // Llamar a actualizarTasas para refrescar los valores visuales
-      if (typeof actualizarTasas === "function") {
-        actualizarTasas();
-      }
-    })
-    .catch(() => {
-      ventaEl.textContent = "Error";
-      compraEl.textContent = "Error";
-      ventaEUREl.textContent = "Error";
-      compraEUREl.textContent = "Error";
-      tcBancoPopular.compra = null;
-      tcBancoPopular.venta = null;
-    });
+    const response = await fetch('/api/tipo-cambio');
+    const apiResponse = await response.json();
+    if (apiResponse.data && apiResponse.data.success && apiResponse.data.data) {
+      const tipoCambioData = apiResponse.data.data;
+      compraEl.textContent = `₡${tipoCambioData.compra.toLocaleString()}`;
+      ventaEl.textContent = `₡${tipoCambioData.venta.toLocaleString()}`;
+      eurCompraEl.textContent = `₡${Math.round(tipoCambioData.compra * 1.02).toLocaleString()}`;
+      eurVentaEl.textContent = `₡${Math.round(tipoCambioData.venta * 1.02).toLocaleString()}`;
+      ultimaEl.textContent = new Date().toLocaleString();
+      actualizarConversionesRapidas();
+    } else {
+      compraEl.textContent = ventaEl.textContent = eurCompraEl.textContent = eurVentaEl.textContent = '--';
+      ultimaEl.textContent = '--';
+      actualizarConversionesRapidas();
+    }
+  } catch (e) {
+    const compraEl = document.getElementById('modal-usd-compra');
+    const ventaEl = document.getElementById('modal-usd-venta');
+    const eurCompraEl = document.getElementById('modal-eur-compra');
+    const eurVentaEl = document.getElementById('modal-eur-venta');
+    const ultimaEl = document.getElementById('ultima-actualizacion');
+    if (compraEl) compraEl.textContent = '--';
+    if (ventaEl) ventaEl.textContent = '--';
+    if (eurCompraEl) eurCompraEl.textContent = '--';
+    if (eurVentaEl) eurVentaEl.textContent = '--';
+    if (ultimaEl) ultimaEl.textContent = '--';
+    actualizarConversionesRapidas();
+  }
 }
 
 // Utilidades de sesión/auth
@@ -651,3 +721,139 @@ window.Auth = {
   };
   tryInit();
 })();
+
+function abrirConversor() {
+  // Siempre intentar cargar el modal antes de mostrarlo
+  if (typeof cargarModalConversion === 'function') {
+    cargarModalConversion(() => {
+      if (typeof mostrarModalConversion === 'function') {
+        mostrarModalConversion();
+      } else {
+        window.location.href = 'tipo-cambio.html';
+      }
+    });
+  } else {
+    window.location.href = 'tipo-cambio.html';
+  }
+}
+
+// Función para realizar la conversión de monedas en el modal
+function realizarConversion() {
+  const cantidadOrigen = parseFloat(document.getElementById('cantidad-origen').value);
+  const monedaOrigen = document.getElementById('moneda-origen').value;
+  const monedaDestino = document.getElementById('moneda-destino').value;
+  const cantidadDestinoEl = document.getElementById('cantidad-destino');
+  const resultadoDiv = document.getElementById('resultado-conversion');
+  const detalleDiv = document.getElementById('detalle-conversion');
+
+  if (!cantidadOrigen || cantidadOrigen <= 0) {
+    cantidadDestinoEl.value = '';
+    resultadoDiv.style.display = 'none';
+    return;
+  }
+  if (monedaOrigen === monedaDestino) {
+    cantidadDestinoEl.value = cantidadOrigen.toFixed(2);
+    mostrarDetalleConversion(cantidadOrigen, monedaOrigen, cantidadOrigen, monedaDestino, 1, 'Sin conversión');
+    return;
+  }
+
+  // Obtener tasas
+  const usdCompra = parseFloat(document.getElementById('modal-usd-compra').textContent.replace(/[^\d.]/g, ''));
+  const usdVenta = parseFloat(document.getElementById('modal-usd-venta').textContent.replace(/[^\d.]/g, ''));
+  const eurCompra = parseFloat(document.getElementById('modal-eur-compra').textContent.replace(/[^\d.]/g, ''));
+  const eurVenta = parseFloat(document.getElementById('modal-eur-venta').textContent.replace(/[^\d.]/g, ''));
+
+  let resultado = 0;
+  let tasa = 0;
+  let tipoOperacion = '';
+
+  // CRC a USD/EUR (se usa venta)
+  if (monedaOrigen === 'CRC') {
+    if (monedaDestino === 'USD') {
+      tasa = usdVenta;
+      resultado = cantidadOrigen / tasa;
+      tipoOperacion = 'CRC→USD (Venta)';
+    } else if (monedaDestino === 'EUR') {
+      tasa = eurVenta;
+      resultado = cantidadOrigen / tasa;
+      tipoOperacion = 'CRC→EUR (Venta)';
+    }
+  }
+  // USD/EUR a CRC (se usa compra)
+  else if (monedaDestino === 'CRC') {
+    if (monedaOrigen === 'USD') {
+      tasa = usdCompra;
+      resultado = cantidadOrigen * tasa;
+      tipoOperacion = 'USD→CRC (Compra)';
+    } else if (monedaOrigen === 'EUR') {
+      tasa = eurCompra;
+      resultado = cantidadOrigen * tasa;
+      tipoOperacion = 'EUR→CRC (Compra)';
+    }
+  }
+  // USD a EUR y viceversa (vía CRC)
+  else if (monedaOrigen === 'USD' && monedaDestino === 'EUR') {
+    // USD→CRC (compra), CRC→EUR (venta)
+    const colones = cantidadOrigen * usdCompra;
+    tasa = eurVenta;
+    resultado = colones / tasa;
+    tipoOperacion = 'USD→CRC (Compra)→EUR (Venta)';
+  } else if (monedaOrigen === 'EUR' && monedaDestino === 'USD') {
+    // EUR→CRC (compra), CRC→USD (venta)
+    const colones = cantidadOrigen * eurCompra;
+    tasa = usdVenta;
+    resultado = colones / tasa;
+    tipoOperacion = 'EUR→CRC (Compra)→USD (Venta)';
+  }
+
+  cantidadDestinoEl.value = resultado.toFixed(2);
+  mostrarDetalleConversion(cantidadOrigen, monedaOrigen, resultado, monedaDestino, tasa, tipoOperacion);
+}
+
+// Función para mostrar el detalle de la conversión
+function mostrarDetalleConversion(origen, monedaOrigen, destino, monedaDestino, tasa, operacion) {
+  const simbolos = { CRC: '₡', USD: '$', EUR: '€' };
+  let detalle = `<strong>${simbolos[monedaOrigen]}${origen.toLocaleString()} ${monedaOrigen}</strong> = <strong class="text-primary">${simbolos[monedaDestino]}${destino.toLocaleString()} ${monedaDestino}</strong>`;
+  if (operacion && tasa) {
+    detalle += `<br><small class="text-muted">Operación: ${operacion} | Tasa: ₡${tasa.toLocaleString()}</small>`;
+  }
+  document.getElementById('detalle-conversion').innerHTML = detalle;
+  document.getElementById('resultado-conversion').style.display = 'block';
+}
+
+// Función para intercambiar monedas en el modal
+function intercambiarMonedas() {
+  const origenSelect = document.getElementById('moneda-origen');
+  const destinoSelect = document.getElementById('moneda-destino');
+  const temp = origenSelect.value;
+  origenSelect.value = destinoSelect.value;
+  destinoSelect.value = temp;
+  // Intercambiar cantidades si hay valores
+  const cantidadOrigen = document.getElementById('cantidad-origen').value;
+  const cantidadDestino = document.getElementById('cantidad-destino').value;
+  if (cantidadDestino) {
+    document.getElementById('cantidad-origen').value = cantidadDestino;
+    document.getElementById('cantidad-destino').value = '';
+    realizarConversion();
+  } else {
+    realizarConversion();
+  }
+}
+
+// Función para limpiar los campos del modal
+function limpiarConversion() {
+  document.getElementById('cantidad-origen').value = '';
+  document.getElementById('cantidad-destino').value = '';
+  document.getElementById('resultado-conversion').style.display = 'none';
+}
+
+// Listeners para conversión automática
+if (document.getElementById('cantidad-origen')) {
+  document.getElementById('cantidad-origen').addEventListener('input', realizarConversion);
+}
+if (document.getElementById('moneda-origen')) {
+  document.getElementById('moneda-origen').addEventListener('change', realizarConversion);
+}
+if (document.getElementById('moneda-destino')) {
+  document.getElementById('moneda-destino').addEventListener('change', realizarConversion);
+}

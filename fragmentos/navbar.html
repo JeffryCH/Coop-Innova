@@ -30,14 +30,10 @@
         <li class="nav-item"><a class="nav-link" href="index.html">🏠 Inicio</a></li>
         <li class="nav-item"><a class="nav-link" href="servicios.html">🛠️ Servicios</a></li>
         <li class="nav-item"><a class="nav-link" href="solicitar_credito.html">💳 Solicitar Crédito</a></li>
-        <li class="nav-item"><a class="nav-link" href="movimientos.html">💰 Movimientos</a></li>
-        <li class="nav-item"><a class="nav-link" href="ver_perfil.html">👤 Ver Perfil</a></li>
+  <!-- Opción de Ver Perfil eliminada, ahora solo aparece en el menú de usuario dinámico -->
         <li class="nav-item"><a class="nav-link" href="tipo-cambio.html">💱 Tipo de Cambio</a></li>
-        <li class="nav-item"><a class="nav-link" href="registro.html">📝 Registro</a></li>
         <li class="nav-item"><a class="nav-link" href="contacto.html">📞 Contacto</a></li>
-        <li class="nav-item">
-          <button class="btn btn-primary btn-sm ms-2" onclick="abrirConversor()">🔄 Conversor</button>
-        </li>
+  <!-- Botón de conversor eliminado, solo queda el principal junto al tipo de cambio -->
         <li class="nav-item" data-auth-item>
           <a class="nav-link" href="login.html">Iniciar sesión</a>
         </li>
@@ -170,10 +166,23 @@ async function actualizarTipoCambio() {
 
 // Función para abrir conversor
 function abrirConversor() {
-  if (typeof mostrarModalConversion === 'function') {
+  // Esperar a que el modal esté cargado
+  const modal = document.getElementById('modal-conversion');
+  if (modal && typeof mostrarModalConversion === 'function') {
     mostrarModalConversion();
   } else {
-    window.location.href = 'tipo-cambio.html';
+    // Si el modal no está disponible, recargar el fragmento y luego abrir
+    if (typeof cargarModalConversion === 'function') {
+      cargarModalConversion(() => {
+        if (typeof mostrarModalConversion === 'function') {
+          mostrarModalConversion();
+        } else {
+          window.location.href = 'tipo-cambio.html';
+        }
+      });
+    } else {
+      window.location.href = 'tipo-cambio.html';
+    }
   }
 }
 

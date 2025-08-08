@@ -1,10 +1,10 @@
 <!-- Modal de Conversión de Monedas -->
-<div id="modal-conversion" class="modal fade" tabindex="-1" aria-labelledby="modalConversionLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
+<div id="modal-conversion" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:9999; background:rgba(0,0,0,0.4); align-items:center; justify-content:center;">
+  <div class="modal-dialog modal-lg" style="max-width:600px; margin:auto;">
     <div class="modal-content">
       <div class="modal-header bg-primary text-white">
-        <h5 class="modal-title" id="modalConversionLabel">💱 Conversor de Monedas</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        <h5 class="modal-title">💱 Conversor de Monedas</h5>
+        <button type="button" class="btn-close btn-close-white modal-conversion-close" aria-label="Cerrar"></button>
       </div>
       <div class="modal-body">
         <!-- Tipo de cambio actual -->
@@ -44,7 +44,6 @@
             </div>
           </div>
         </div>
-
         <!-- Conversor -->
         <div class="card">
           <div class="card-header bg-secondary text-white">
@@ -75,19 +74,11 @@
                 </div>
               </div>
             </div>
-            
             <div class="text-center">
-              <button type="button" class="btn btn-primary" onclick="realizarConversion()">
-                🔄 Convertir
-              </button>
-              <button type="button" class="btn btn-secondary ms-2" onclick="intercambiarMonedas()">
-                ⇄ Intercambiar
-              </button>
-              <button type="button" class="btn btn-outline-secondary ms-2" onclick="limpiarConversion()">
-                🗑️ Limpiar
-              </button>
+              <button type="button" class="btn btn-primary" onclick="realizarConversion()">🔄 Convertir</button>
+              <button type="button" class="btn btn-secondary ms-2" onclick="intercambiarMonedas()">⇄ Intercambiar</button>
+              <button type="button" class="btn btn-outline-secondary ms-2" onclick="limpiarConversion()">🗑️ Limpiar</button>
             </div>
-
             <!-- Resultado detallado -->
             <div id="resultado-conversion" class="mt-3" style="display: none;">
               <div class="alert alert-info">
@@ -97,7 +88,6 @@
             </div>
           </div>
         </div>
-
         <!-- Historial rápido -->
         <div class="card mt-3">
           <div class="card-header">
@@ -131,221 +121,9 @@
         <small class="text-muted me-auto">
           📈 Datos del BCCR | 🕒 Actualizado: <span id="ultima-actualizacion">--</span>
         </small>
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        <button type="button" class="btn btn-secondary modal-conversion-close">Cerrar</button>
       </div>
     </div>
   </div>
 </div>
-
-<script>
-// Variables globales para el modal
-let tipoCambioModal = {
-  usd: { compra: 0, venta: 0 },
-  eur: { compra: 0, venta: 0 },
-  ultimaActualizacion: null
-};
-
-// Función para mostrar el modal
-function mostrarModalConversion() {
-  actualizarTipoCambioModal();
-  const modal = new bootstrap.Modal(document.getElementById('modal-conversion'));
-  modal.show();
-}
-
-// Actualizar tipo de cambio en el modal
-async function actualizarTipoCambioModal() {
-  try {
-    const response = await fetch('/api/tipo-cambio');
-    const apiResponse = await response.json();
-    
-    console.log('📡 Respuesta API modal:', apiResponse);
-    
-    // La estructura es: { data: { success: true, data: { compra, venta } }, lastUpdate, services }
-    if (apiResponse.data && apiResponse.data.success && apiResponse.data.data) {
-      const tipoCambioData = apiResponse.data.data;
-      
-      // USD del BCCR
-      tipoCambioModal.usd = {
-        compra: tipoCambioData.compra,
-        venta: tipoCambioData.venta
-      };
-      
-      // EUR calculado (USD + 2%)
-      tipoCambioModal.eur = {
-        compra: Math.round(tipoCambioData.compra * 1.02 * 100) / 100,
-        venta: Math.round(tipoCambioData.venta * 1.02 * 100) / 100
-      };
-      
-      tipoCambioModal.ultimaActualizacion = new Date().toLocaleString();
-      
-      console.log('💱 Tipo de cambio actualizado en modal:', tipoCambioModal);
-      
-      // Actualizar interfaz del modal
-      actualizarInterfazModal();
-      calcularConversionesRapidas();
-    } else {
-      console.error('❌ Estructura de datos inesperada en modal:', apiResponse);
-      throw new Error('Datos no válidos en la respuesta');
-    }
-  } catch (error) {
-    console.error('Error al obtener tipo de cambio para modal:', error);
-  }
-}
-
-// Actualizar interfaz del modal
-function actualizarInterfazModal() {
-  document.getElementById('modal-usd-compra').textContent = `₡${tipoCambioModal.usd.compra.toFixed(0)}`;
-  document.getElementById('modal-usd-venta').textContent = `₡${tipoCambioModal.usd.venta.toFixed(0)}`;
-  document.getElementById('modal-eur-compra').textContent = `₡${tipoCambioModal.eur.compra.toFixed(0)}`;
-  document.getElementById('modal-eur-venta').textContent = `₡${tipoCambioModal.eur.venta.toFixed(0)}`;
-  document.getElementById('ultima-actualizacion').textContent = tipoCambioModal.ultimaActualizacion || '--';
-}
-
-// Realizar conversión
-function realizarConversion() {
-  const cantidadOrigen = parseFloat(document.getElementById('cantidad-origen').value);
-  const monedaOrigen = document.getElementById('moneda-origen').value;
-  const monedaDestino = document.getElementById('moneda-destino').value;
-  
-  if (!cantidadOrigen || cantidadOrigen <= 0) {
-    alert('Por favor ingrese una cantidad válida');
-    return;
-  }
-  
-  if (monedaOrigen === monedaDestino) {
-    document.getElementById('cantidad-destino').value = cantidadOrigen.toFixed(2);
-    mostrarDetalleConversion(cantidadOrigen, monedaOrigen, cantidadOrigen, monedaDestino, 1);
-    return;
-  }
-  
-  let resultado = 0;
-  let tasa = 0;
-  let tipoOperacion = '';
-  
-  // Conversiones desde CRC
-  if (monedaOrigen === 'CRC') {
-    if (monedaDestino === 'USD') {
-      tasa = tipoCambioModal.usd.compra;
-      resultado = cantidadOrigen / tasa;
-      tipoOperacion = 'compra USD';
-    } else if (monedaDestino === 'EUR') {
-      tasa = tipoCambioModal.eur.compra;
-      resultado = cantidadOrigen / tasa;
-      tipoOperacion = 'compra EUR';
-    }
-  }
-  // Conversiones desde USD
-  else if (monedaOrigen === 'USD') {
-    if (monedaDestino === 'CRC') {
-      tasa = tipoCambioModal.usd.venta;
-      resultado = cantidadOrigen * tasa;
-      tipoOperacion = 'venta USD';
-    } else if (monedaDestino === 'EUR') {
-      // USD a EUR vía CRC
-      const colones = cantidadOrigen * tipoCambioModal.usd.venta;
-      tasa = tipoCambioModal.eur.compra;
-      resultado = colones / tasa;
-      tipoOperacion = 'USD→CRC→EUR';
-    }
-  }
-  // Conversiones desde EUR
-  else if (monedaOrigen === 'EUR') {
-    if (monedaDestino === 'CRC') {
-      tasa = tipoCambioModal.eur.venta;
-      resultado = cantidadOrigen * tasa;
-      tipoOperacion = 'venta EUR';
-    } else if (monedaDestino === 'USD') {
-      // EUR a USD vía CRC
-      const colones = cantidadOrigen * tipoCambioModal.eur.venta;
-      tasa = tipoCambioModal.usd.compra;
-      resultado = colones / tasa;
-      tipoOperacion = 'EUR→CRC→USD';
-    }
-  }
-  
-  document.getElementById('cantidad-destino').value = resultado.toFixed(2);
-  mostrarDetalleConversion(cantidadOrigen, monedaOrigen, resultado, monedaDestino, tasa, tipoOperacion);
-}
-
-// Mostrar detalle de conversión
-function mostrarDetalleConversion(origen, monedaOrigen, destino, monedaDestino, tasa, operacion) {
-  const simbolos = { CRC: '₡', USD: '$', EUR: '€' };
-  
-  let detalle = `
-    <strong>${simbolos[monedaOrigen]}${origen.toLocaleString()} ${monedaOrigen}</strong> = 
-    <strong class="text-primary">${simbolos[monedaDestino]}${destino.toLocaleString()} ${monedaDestino}</strong>
-  `;
-  
-  if (operacion && tasa) {
-    detalle += `<br><small class="text-muted">Operación: ${operacion} | Tasa: ₡${tasa.toLocaleString()}</small>`;
-  }
-  
-  document.getElementById('detalle-conversion').innerHTML = detalle;
-  document.getElementById('resultado-conversion').style.display = 'block';
-}
-
-// Intercambiar monedas
-function intercambiarMonedas() {
-  const origenSelect = document.getElementById('moneda-origen');
-  const destinoSelect = document.getElementById('moneda-destino');
-  
-  const temp = origenSelect.value;
-  origenSelect.value = destinoSelect.value;
-  destinoSelect.value = temp;
-  
-  // Intercambiar cantidades si hay valores
-  const cantidadOrigen = document.getElementById('cantidad-origen').value;
-  const cantidadDestino = document.getElementById('cantidad-destino').value;
-  
-  if (cantidadDestino) {
-    document.getElementById('cantidad-origen').value = cantidadDestino;
-    document.getElementById('cantidad-destino').value = '';
-    realizarConversion();
-  }
-}
-
-// Limpiar conversión
-function limpiarConversion() {
-  document.getElementById('cantidad-origen').value = '';
-  document.getElementById('cantidad-destino').value = '';
-  document.getElementById('resultado-conversion').style.display = 'none';
-}
-
-// Calcular conversiones rápidas
-function calcularConversionesRapidas() {
-  if (tipoCambioModal.usd.venta > 0) {
-    document.getElementById('quick-100usd').textContent = `₡${(100 * tipoCambioModal.usd.venta).toLocaleString()}`;
-    document.getElementById('quick-100000crc').textContent = `$${(100000 / tipoCambioModal.usd.compra).toFixed(2)}`;
-  }
-  
-  if (tipoCambioModal.eur.venta > 0) {
-    document.getElementById('quick-100eur').textContent = `₡${(100 * tipoCambioModal.eur.venta).toLocaleString()}`;
-  }
-}
-
-// Event listeners
-document.addEventListener('DOMContentLoaded', function() {
-  // Auto-conversión al escribir
-  document.getElementById('cantidad-origen').addEventListener('input', function() {
-    if (this.value) {
-      realizarConversion();
-    } else {
-      document.getElementById('cantidad-destino').value = '';
-      document.getElementById('resultado-conversion').style.display = 'none';
-    }
-  });
-  
-  // Auto-conversión al cambiar monedas
-  document.getElementById('moneda-origen').addEventListener('change', function() {
-    if (document.getElementById('cantidad-origen').value) {
-      realizarConversion();
-    }
-  });
-  
-  document.getElementById('moneda-destino').addEventListener('change', function() {
-    if (document.getElementById('cantidad-origen').value) {
-      realizarConversion();
-    }
-  });
-});
-</script>
+<!-- El manejo del modal y la actualización de tipo de cambio se realiza desde js/includes.js -->
