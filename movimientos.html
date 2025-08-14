@@ -18,7 +18,7 @@
   <div id="modal-conversion-container"></div>
   
   <div class="container pt-5 mt-5">
-    <h2 class="mb-4 text-primary">Movimientos de Leidy</h2>
+    <h2 class="mb-4 text-primary" id="titulo-movimientos">Movimientos</h2>
     <div class="table-responsive">
       <table class="table table-bordered table-striped">
         <thead class="table-dark">
@@ -28,8 +28,7 @@
             <th>Fecha</th>
           </tr>
         </thead>
-        <tbody id="tablaMovimientos">
-        </tbody>
+        <tbody id="tablaMovimientos"></tbody>
       </table>
     </div>
   </div>
@@ -46,21 +45,46 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="js/includes.js"></script>
   <script>
-    const movimientos = [
-      { tipo: 'Depósito', monto: 1000.00, fecha: '2025-07-01 09:00' },
-      { tipo: 'Retiro', monto: 200.00, fecha: '2025-07-03 14:20' },
-      { tipo: 'Crédito', monto: 5000.00, fecha: '2025-07-05 11:45' },
-      { tipo: 'Pago', monto: 250.00, fecha: '2025-07-07 16:30' }
-    ];
-
-    const tabla = document.getElementById("tablaMovimientos");
-    movimientos.forEach(m => {
-      tabla.innerHTML += `
-        <tr>
-          <td>${m.tipo}</td>
-          <td>₡${m.monto.toFixed(2)}</td>
-          <td>${m.fecha}</td>
-        </tr>`;
+    document.addEventListener('DOMContentLoaded', function() {
+      var tabla = document.getElementById("tablaMovimientos");
+      var titulo = document.getElementById("titulo-movimientos");
+      tabla.innerHTML = '<tr><td colspan="3" class="text-center"><div class="spinner-border text-primary"></div> Cargando...</td></tr>';
+      fetch('php/session.php', { credentials: 'include' })
+        .then(function(r) { return r.json(); })
+        .then(function(sesion) {
+          if (!sesion.user || !sesion.user.id) {
+            titulo.textContent = 'Movimientos';
+            tabla.innerHTML = '<tr><td colspan="3" class="text-center text-warning">Debes iniciar sesión para ver tus movimientos.</td></tr>';
+            return;
+          }
+          titulo.textContent = 'Movimientos de ' + sesion.user.nombre;
+          fetch('php/movimientos_usuario.php', { credentials: 'include' })
+            .then(function(resp) { return resp.json(); })
+            .then(function(data) {
+              if (!data.success || !data.movimientos || data.movimientos.length === 0) {
+                tabla.innerHTML = '<tr><td colspan="3" class="text-center text-info">No se encontraron movimientos recientes.</td></tr>';
+                return;
+              }
+              tabla.innerHTML = '';
+              data.movimientos.forEach(function(m) {
+                var tipo = m.tipo.charAt(0).toUpperCase() + m.tipo.slice(1);
+                var monto = '₡' + parseFloat(m.monto).toLocaleString('es-CR', { minimumFractionDigits: 2 });
+                var fecha = new Date(m.fecha).toLocaleString();
+                tabla.innerHTML += '<tr>' +
+                  '<td>' + tipo + '</td>' +
+                  '<td>' + monto + '</td>' +
+                  '<td>' + fecha + '</td>' +
+                  '</tr>';
+              });
+            })
+            .catch(function() {
+              tabla.innerHTML = '<tr><td colspan="3" class="text-center text-danger">Error al cargar movimientos.</td></tr>';
+            });
+        })
+        .catch(function() {
+          titulo.textContent = 'Movimientos';
+          tabla.innerHTML = '<tr><td colspan="3" class="text-center text-danger">Error al cargar sesión.</td></tr>';
+        });
     });
   </script>
 </body>

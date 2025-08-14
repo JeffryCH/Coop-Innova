@@ -61,7 +61,7 @@ try {
     $sql_movimientos = "CREATE TABLE IF NOT EXISTS movimientos (
         id INT AUTO_INCREMENT PRIMARY KEY,
         usuario_id INT,
-        tipo ENUM('deposito','retiro','credito','pago'),
+        tipo ENUM('deposito','retiro','credito','pago','transferencia'),
         monto DECIMAL(10,2),
         fecha DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (usuario_id) REFERENCES usuarios(id)

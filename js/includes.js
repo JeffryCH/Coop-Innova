@@ -690,6 +690,8 @@ window.Auth = {
         <ul class="dropdown-menu dropdown-menu-end">
           <li><a class="dropdown-item" href="ver_perfil.html">Perfil</a></li>
           <li><a class="dropdown-item" href="movimientos.html">Mis movimientos</a></li>
+          <li><a class="dropdown-item" href="historial_creditos.html">Historial de créditos</a></li>
+          <li><a class="dropdown-item" href="realizar_movimiento.html">Realizar movimiento</a></li>
           <li><hr class="dropdown-divider"></li>
           <li><a id="btn-logout" class="dropdown-item" href="#">Cerrar sesión</a></li>
         </ul>`;
