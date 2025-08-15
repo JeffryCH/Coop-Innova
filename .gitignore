@@ -6,4 +6,12 @@ package-lock.json
 .env
 node_modules/
 GITHUB_TOKEN.env
+ # Archivos locales y scripts de configuración que no deben versionarse
+ database_config.php
+ test_connection.php
+ setup_database.php
+ api_registro.php
+ login.php
+ procesar_registro.php
+ database-setup.js
 
