@@ -220,6 +220,4 @@ Este proyecto está configurado para usar Node.js, integrarse con GitHub y conec
    npm start
    ```
 
-## Notas
-- No almacenes el token de GitHub en archivos de texto plano.
-- Usa MySQL Workbench para administrar la base de datos.
+
