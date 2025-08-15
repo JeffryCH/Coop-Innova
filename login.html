@@ -40,36 +40,6 @@
 
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script src="js/includes.js"></script>
-  <script>
-    $(function () {
-      $('#login-form').on('submit', function (e) {
-        e.preventDefault();
-        const usuario = $('#login-usuario').val().trim();
-        const password = $('#login-password').val();
-        const $alert = $('#login-alert');
-
-        $alert.addClass('d-none').removeClass('alert-danger alert-success').text('');
-
-        $.ajax({
-          url: 'php/login.php',
-          method: 'POST',
-          data: { usuario, password },
-          success: function (resp) {
-            if (resp && resp.success) {
-              $alert.removeClass('d-none').addClass('alert alert-success').text('¡Bienvenido ' + resp.user.nombre + '!');
-              setTimeout(() => { window.location.href = 'index.html'; }, 1000);
-            } else {
-              $alert.removeClass('d-none').addClass('alert alert-danger').text(resp.message || 'Credenciales inválidas');
-            }
-          },
-          error: function (xhr) {
-            let msg = 'Error al iniciar sesión';
-            try { msg = (JSON.parse(xhr.responseText)).message || msg; } catch {}
-            $alert.removeClass('d-none').addClass('alert alert-danger').text(msg);
-          }
-        });
-      });
-    });
-  </script>
+  <script src="js/login.js"></script>
 </body>
 </html>

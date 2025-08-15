@@ -1,31 +1,21 @@
 <?php
 echo "<h2>🔧 Configurador de Base de Datos - Coop-Innova</h2>";
 
-$host = "localhost";
-$base_datos = "coop_innova";
 
-// Función para intentar conexión con múltiples credenciales
+$base_datos = require_once 'php/database_config.php';
+
 function conectarServidor()
 {
-    $host = "localhost";
-
-    // Intentar múltiples configuraciones de usuario/contraseña
-    $credenciales = [
-        ['user' => 'root', 'password' => ''],      // Primera opción
-        ['user' => 'root', 'password' => '']     // Segunda opción (compañero)
-    ];
-
+    $credenciales = DatabaseConfig::getEnvCredenciales();
     foreach ($credenciales as $cred) {
-        $conexion = new mysqli($host, $cred['user'], $cred['password']);
-
+        $conexion = new mysqli(DatabaseConfig::HOST, $cred['user'], $cred['password'], null, $cred['port']);
         if (!$conexion->connect_error) {
-            echo "✅ Conexión exitosa al servidor con usuario: <strong>{$cred['user']}</strong><br>";
+            echo "✅ Conexión exitosa al servidor con usuario: <strong>{$cred['user']}</strong> (puerto: {$cred['port']})<br>";
             return $conexion; // Conexión exitosa
         } else {
-            echo "❌ Intento fallido con usuario '{$cred['user']}': {$conexion->connect_error}<br>";
+            echo "❌ Intento fallido con usuario '{$cred['user']}' (puerto: {$cred['port']}): {$conexion->connect_error}<br>";
         }
     }
-
     return false; // No se pudo conectar con ninguna credencial
 }
 

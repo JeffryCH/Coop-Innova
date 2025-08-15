@@ -26,24 +26,7 @@
         </tr>
       </thead>
       <tbody id="creditTableBody">
-        <tr>
-          <td>Juan Pérez</td>
-          <td>₡2,000.00</td>
-          <td class="estado">Pendiente</td>
-          <td>
-            <button class="btn btn-success btn-sm aprobar">Aprobar</button>
-            <button class="btn btn-danger btn-sm denegar">Denegar</button>
-          </td>
-        </tr>
-        <tr>
-          <td>María López</td>
-          <td>₡5,000.00</td>
-          <td class="estado">Pendiente</td>
-          <td>
-            <button class="btn btn-success btn-sm aprobar">Aprobar</button>
-            <button class="btn btn-danger btn-sm denegar">Denegar</button>
-          </td>
-        </tr>
+        <!-- Las filas se cargarán dinámicamente -->
       </tbody>
     </table>
 
@@ -58,16 +41,52 @@
     const messageDiv = document.getElementById('message');
     const tableBody = document.getElementById('creditTableBody');
 
+    // Cargar solicitudes de crédito desde la API
+    function cargarSolicitudes() {
+      fetch('php/creditos_api.php')
+        .then(res => res.json())
+        .then(data => {
+          tableBody.innerHTML = '';
+          if (data.success && data.creditos.length > 0) {
+            data.creditos.forEach(credito => {
+              const row = document.createElement('tr');
+              row.innerHTML = `
+                <td>${credito.cliente}</td>
+                <td>₡${parseFloat(credito.monto).toLocaleString('es-CR', {minimumFractionDigits:2})}</td>
+                <td class="estado">${credito.estado}</td>
+                <td>
+                  <button class="btn btn-success btn-sm aprobar" data-id="${credito.id}">Aprobar</button>
+                  <button class="btn btn-danger btn-sm denegar" data-id="${credito.id}">Denegar</button>
+                </td>
+              `;
+              tableBody.appendChild(row);
+            });
+          } else {
+            tableBody.innerHTML = '<tr><td colspan="4">No hay solicitudes de crédito.</td></tr>';
+          }
+        });
+    }
+
+    cargarSolicitudes();
+
     tableBody.addEventListener('click', function (e) {
-      if (e.target.classList.contains('aprobar')) {
-        const row = e.target.closest('tr');
-        row.querySelector('.estado').textContent = 'Aprobado';
-        messageDiv.innerHTML = `<div class="alert alert-success">Solicitud aprobada y monto acreditado.</div>`;
-      }
-      if (e.target.classList.contains('denegar')) {
-        const row = e.target.closest('tr');
-        row.querySelector('.estado').textContent = 'Denegado';
-        messageDiv.innerHTML = `<div class="alert alert-warning">Solicitud denegada.</div>`;
+      if (e.target.classList.contains('aprobar') || e.target.classList.contains('denegar')) {
+        const id = e.target.getAttribute('data-id');
+        const accion = e.target.classList.contains('aprobar') ? 'aprobar' : 'denegar';
+        fetch('php/creditos_api.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: `id=${id}&accion=${accion}`
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            cargarSolicitudes();
+            messageDiv.innerHTML = `<div class="alert alert-${accion === 'aprobar' ? 'success' : 'warning'}">Solicitud ${accion === 'aprobar' ? 'aprobada y monto acreditado.' : 'denegada.'}</div>`;
+          } else {
+            messageDiv.innerHTML = `<div class="alert alert-danger">${data.error || 'Error al actualizar.'}</div>`;
+          }
+        });
       }
     });
   </script>

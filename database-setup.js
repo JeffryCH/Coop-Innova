@@ -1,13 +1,47 @@
 const mysql = require('mysql2/promise');
 
 class DatabaseSetup {
+    async ensureNativePasswordPlugin() {
+        // Intenta cambiar el plugin de autenticación a mysql_native_password si es necesario
+        for (const cred of this.credentials) {
+            try {
+                const connection = await mysql.createConnection({
+                    host: this.host,
+                    user: cred.user,
+                    password: cred.password,
+                    port: cred.port,
+                });
+                // Detecta si el plugin es caching_sha2_password y lo cambia
+                const [rows] = await connection.query("SELECT plugin FROM mysql.user WHERE user = ? AND host = 'localhost'", [cred.user]);
+                if (rows.length && rows[0].plugin !== 'mysql_native_password') {
+                    await connection.query(`ALTER USER '${cred.user}'@'localhost' IDENTIFIED WITH mysql_native_password BY '${cred.password}'`);
+                    console.log(`🔧 Plugin de autenticación cambiado a mysql_native_password para usuario '${cred.user}'`);
+                }
+                await connection.end();
+            } catch (error) {
+                // Ignorar errores si el usuario no existe o no tiene permisos
+            }
+        }
+    }
     constructor() {
         this.host = 'localhost';
         this.database = 'coop_innova';
-        this.credentials = [
-            { user: 'root', password: '' },      // Primera opción
-            { user: 'root', password: '' }     // Segunda opción (compañero)
-        ];
+        // Leer credenciales desde .env
+        this.credentials = [];
+        if (process.env.DB_USER_1) {
+            this.credentials.push({
+                user: process.env.DB_USER_1,
+                password: process.env.DB_PASSWORD_1 || '',
+                port: process.env.DB_PORT_1 || 3306
+            });
+        }
+        if (process.env.DB_USER_2) {
+            this.credentials.push({
+                user: process.env.DB_USER_2,
+                password: process.env.DB_PASSWORD_2 || '',
+                port: process.env.DB_PORT_2 || 3306
+            });
+        }
     }
 
     async getConnection(includeDatabase = true) {
@@ -17,6 +51,7 @@ class DatabaseSetup {
                     host: this.host,
                     user: cred.user,
                     password: cred.password,
+                    port: cred.port,
                     database: includeDatabase ? this.database : undefined
                 });
                 console.log(`✅ Conexión exitosa con usuario: ${cred.user}`);
@@ -29,6 +64,8 @@ class DatabaseSetup {
     }
 
     async createDatabase() {
+    // Asegura el plugin correcto antes de crear la base de datos
+    await this.ensureNativePasswordPlugin();
         console.log('🔧 Creando base de datos si no existe...');
         const result = await this.getConnection(false);
         

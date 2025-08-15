@@ -91,12 +91,15 @@ if ($tipo === 'transferencia') {
     exit;
 }
 
-// Actualizar ahorros
+// Actualizar ahorros y registrar movimiento
 if ($result) {
+    $fecha = date('Y-m-d H:i:s');
     if (in_array($tipo_bd, ['deposito', 'credito'])) {
         $conexion->query("INSERT INTO ahorros (usuario_id, monto) VALUES ($id_usuario, $monto)");
+        $conexion->query("INSERT INTO movimientos (usuario_id, tipo, monto, fecha) VALUES ($id_usuario, '$tipo_bd', $monto, '$fecha')");
     } else if (in_array($tipo_bd, ['retiro', 'pago'])) {
         $conexion->query("INSERT INTO ahorros (usuario_id, monto) VALUES ($id_usuario, -$monto)");
+        $conexion->query("INSERT INTO movimientos (usuario_id, tipo, monto, fecha) VALUES ($id_usuario, '$tipo_bd', -$monto, '$fecha')");
     }
 }
 

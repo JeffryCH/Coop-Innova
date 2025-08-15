@@ -21,21 +21,7 @@ if ($usuario === '' || $password === '') {
 
 try {
     // Usar la conexión centralizada de DatabaseConfig
-    if (!isset($conexion) || !$conexion) {
-        // Fallback si no existe $conexion desde conexion_registro.php
-        $host = 'localhost';
-        $db = 'coop_innova';
-        $credenciales = [
-            ['user' => 'root', 'password' => ''],
-            ['user' => 'root', 'password' => '']
-        ];
-        foreach ($credenciales as $cred) {
-            $conexion = @new mysqli($host, $cred['user'], $cred['password'], $db);
-            if (!$conexion->connect_error)
-                break;
-        }
-    }
-
+    $conexion = DatabaseConfig::getConnection();
     if (!$conexion || $conexion->connect_error) {
         throw new Exception('Sin conexión a base de datos');
     }

@@ -19,6 +19,16 @@
   
   <div class="container pt-5 mt-5">
     <h2 class="mb-4 text-primary" id="titulo-movimientos">Movimientos</h2>
+    <div class="row mb-4">
+      <div class="col-md-6">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title">Saldo disponible</h5>
+            <p class="card-text fs-3 text-success" id="saldoDisponible">₡0.00</p>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="table-responsive">
       <table class="table table-bordered table-striped">
         <thead class="table-dark">
@@ -48,6 +58,7 @@
     document.addEventListener('DOMContentLoaded', function() {
       var tabla = document.getElementById("tablaMovimientos");
       var titulo = document.getElementById("titulo-movimientos");
+      var saldoDiv = document.getElementById("saldoDisponible");
       tabla.innerHTML = '<tr><td colspan="3" class="text-center"><div class="spinner-border text-primary"></div> Cargando...</td></tr>';
       fetch('php/session.php', { credentials: 'include' })
         .then(function(r) { return r.json(); })
@@ -55,35 +66,46 @@
           if (!sesion.user || !sesion.user.id) {
             titulo.textContent = 'Movimientos';
             tabla.innerHTML = '<tr><td colspan="3" class="text-center text-warning">Debes iniciar sesión para ver tus movimientos.</td></tr>';
+            saldoDiv.textContent = '₡0.00';
             return;
           }
           titulo.textContent = 'Movimientos de ' + sesion.user.nombre;
-          fetch('php/movimientos_usuario.php', { credentials: 'include' })
+          fetch('php/saldo_movimientos_api.php', { credentials: 'include' })
             .then(function(resp) { return resp.json(); })
             .then(function(data) {
-              if (!data.success || !data.movimientos || data.movimientos.length === 0) {
+              if (!data.success) {
+                tabla.innerHTML = '<tr><td colspan="3" class="text-center text-danger">Error al cargar movimientos.</td></tr>';
+                saldoDiv.textContent = '₡0.00';
+                return;
+              }
+              saldoDiv.textContent = '₡' + parseFloat(data.saldo).toLocaleString('es-CR', { minimumFractionDigits: 2 });
+              if (!data.movimientos || data.movimientos.length === 0) {
                 tabla.innerHTML = '<tr><td colspan="3" class="text-center text-info">No se encontraron movimientos recientes.</td></tr>';
                 return;
               }
               tabla.innerHTML = '';
               data.movimientos.forEach(function(m) {
                 var tipo = m.tipo.charAt(0).toUpperCase() + m.tipo.slice(1);
-                var monto = '₡' + parseFloat(m.monto).toLocaleString('es-CR', { minimumFractionDigits: 2 });
+                var monto = parseFloat(m.monto);
+                var esEntrada = monto > 0;
+                var montoStr = (esEntrada ? '<span class="text-success">' : '<span class="text-danger">') + '₡' + Math.abs(monto).toLocaleString('es-CR', { minimumFractionDigits: 2 }) + '</span>';
                 var fecha = new Date(m.fecha).toLocaleString();
                 tabla.innerHTML += '<tr>' +
-                  '<td>' + tipo + '</td>' +
-                  '<td>' + monto + '</td>' +
+                  '<td>' + tipo + (esEntrada ? ' <span class="badge bg-success">Entrada</span>' : ' <span class="badge bg-danger">Salida</span>') + '</td>' +
+                  '<td>' + montoStr + '</td>' +
                   '<td>' + fecha + '</td>' +
                   '</tr>';
               });
             })
             .catch(function() {
               tabla.innerHTML = '<tr><td colspan="3" class="text-center text-danger">Error al cargar movimientos.</td></tr>';
+              saldoDiv.textContent = '₡0.00';
             });
         })
         .catch(function() {
           titulo.textContent = 'Movimientos';
           tabla.innerHTML = '<tr><td colspan="3" class="text-center text-danger">Error al cargar sesión.</td></tr>';
+          saldoDiv.textContent = '₡0.00';
         });
     });
   </script>

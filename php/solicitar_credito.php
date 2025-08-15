@@ -33,4 +33,6 @@ if ($result) {
 } else {
     echo json_encode(['success' => false, 'error' => 'No se pudo guardar la solicitud']);
 }
+
 $conexion->close();
+?>

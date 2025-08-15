@@ -17,15 +17,10 @@
     <h2 class="mb-4 text-primary">Depósito a Cuenta</h2>
     <form id="depositForm" class="bg-white p-4 rounded shadow-sm">
       <div class="mb-3">
-        <label for="accountNumber" class="form-label">Número de cuenta</label>
-        <input
-          type="text"
-          class="form-control"
-          id="accountNumber"
-          name="accountNumber"
-          placeholder="Ingrese número de cuenta"
-          required
-        />
+        <label for="usuarioSelect" class="form-label">Usuario destino</label>
+        <select class="form-control" id="usuarioSelect" name="usuario_id" required>
+          <option value="">Seleccione un usuario...</option>
+        </select>
       </div>
       <div class="mb-3">
         <label for="amount" class="form-label">Monto a depositar</label>
@@ -52,26 +47,49 @@
   <script>
     const form = document.getElementById('depositForm');
     const messageDiv = document.getElementById('message');
+    const usuarioSelect = document.getElementById('usuarioSelect');
+
+    // Cargar usuarios existentes
+    fetch('php/deposito_api.php')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.usuarios.length > 0) {
+          data.usuarios.forEach(u => {
+            const option = document.createElement('option');
+            option.value = u.id;
+            option.textContent = `${u.nombre} (${u.usuario})`;
+            usuarioSelect.appendChild(option);
+          });
+        }
+      });
 
     form.addEventListener('submit', function (e) {
       e.preventDefault();
-
-      const accountNumber = form.accountNumber.value.trim();
+      const usuario_id = usuarioSelect.value;
       const amount = parseFloat(form.amount.value);
-
-      if (!accountNumber) {
-        messageDiv.innerHTML = '<div class="alert alert-danger">Por favor ingresa un número de cuenta válido.</div>';
+      if (!usuario_id) {
+        messageDiv.innerHTML = '<div class="alert alert-danger">Por favor selecciona un usuario válido.</div>';
         return;
       }
       if (isNaN(amount) || amount <= 0) {
         messageDiv.innerHTML = '<div class="alert alert-danger">Por favor ingresa un monto válido mayor a cero.</div>';
         return;
       }
-
-      
-      messageDiv.innerHTML = <div class="alert alert-success">Depósito solicitado: ₡${amount.toFixed(2)} a la cuenta ${accountNumber}</div>;
-
-      form.reset();
+      // Realizar depósito vía API
+      fetch('php/deposito_api.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `usuario_id=${usuario_id}&monto=${amount}`
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          messageDiv.innerHTML = `<div class="alert alert-success">Depósito realizado: ₡${amount.toFixed(2)} al usuario seleccionado.</div>`;
+          form.reset();
+        } else {
+          messageDiv.innerHTML = `<div class="alert alert-danger">${data.error || 'Error al realizar el depósito.'}</div>`;
+        }
+      });
     });
   </script>
 </body>

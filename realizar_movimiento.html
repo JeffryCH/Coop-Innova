@@ -65,14 +65,21 @@
       document.getElementById('tipo-movimiento').addEventListener('change', async function() {
         const extra = document.getElementById('extra-campos');
         if (this.value === 'transferencia') {
-          // Obtener lista de usuarios
+          // Obtener lista de usuarios y excluir el usuario logueado
           let usuarios = [];
+          let sesion = null;
+          try {
+            sesion = await fetch('php/session.php', { credentials: 'include' }).then(r => r.json());
+          } catch (e) {}
           try {
             const resp = await fetch('php/usuarios_lista.php', { credentials: 'include' });
             const data = await resp.json();
             if (data.success && data.usuarios) usuarios = data.usuarios;
           } catch (e) {}
-          let options = usuarios.map(u => `<option value='${u.id}'>${u.nombre} (${u.usuario})</option>`).join('');
+          let options = usuarios
+            .filter(u => !sesion.user || u.id !== sesion.user.id)
+            .map(u => `<option value='${u.id}'>${u.nombre} (${u.usuario})</option>`)
+            .join('');
           extra.innerHTML = `<label for='cuenta-destino' class='form-label'>Cuenta destino</label><select class='form-select' id='cuenta-destino' required>${options}</select>`;
         } else if (this.value === 'pago_servicio') {
           extra.innerHTML = `<label for='servicio' class='form-label'>Servicio</label><input type='text' class='form-control' id='servicio' required>`;
