@@ -1,8 +1,20 @@
 # 🏦 Coop-Innova
 
-Sistema web para cooperativa de ahorros y créditos con configuración automática de base de datos y API de tipo de cambio integrada.
+Sistema web para cooperativa de ahorros y créditos con configuración automática de base de datos, API de tipo de cambio integrada y frontend moderno con Bootstrap 5.
 
-## 🚀 Inicio Rápido
+## 👥 Equipo del Proyecto
+
+**Universidad Fidélitas - Curso: Ambiente Web (2025)**
+
+| Nombre                                 | Rol                        | Correo                        |
+|----------------------------------------|----------------------------|-------------------------------|
+| Salgado Navarro Leidy Vanessa          | Frontend Lead              | lsalgado10271@ufide.ac.cr     |
+| Alvarez Umaña Kevin Julian             | Backend Architect          | kalvarez80129@ufide.ac.cr     |
+| Arguello Selva Dylan Andrey            | Database Manager           | darguello00910@ufide.ac.cr    |
+| Jeffry Moises Canales Herrera          | Fullstack & Project Manager| jcanales20717@ufide.ac.cr     |
+| Prof. Gutierrez Calvo Bryan            | Profesor                   | bgutierrez60408@ufide.ac.cr   |
+
+# 🚀 Inicio Rápido
 
 ### Configuración Automática Completa
 ```bash
@@ -29,7 +41,7 @@ El sistema prueba automáticamente estas credenciales en orden:
 - 📊 **Actualización automática** cada 30 minutos
 - � **Datos simulados** si falla la conexión al BCCR
 
-## �📋 Comandos Disponibles
+# 📋 Comandos Disponibles
 
 ```bash
 # 🚀 Iniciar servidor completo (BD + APIs + Web)
@@ -57,9 +69,10 @@ npm run python-api
 - 🏠 **Inicio**: http://localhost:3000/
 - 📝 **Registro**: http://localhost:3000/registro.html
 - 💰 **Movimientos**: http://localhost:3000/movimientos.html
-- � **Perfil**: http://localhost:3000/ver_perfil.html
+- 👤 **Perfil**: http://localhost:3000/ver_perfil.html
 - 💳 **Solicitar Crédito**: http://localhost:3000/solicitar_credito.html
 - 📞 **Contacto**: http://localhost:3000/contacto.html
+- 🧑‍💻 **Equipo del Proyecto**: http://localhost:3000/equipo.html
 
 ### 🔌 APIs REST
 - 💱 **Tipo de Cambio**: `GET http://localhost:3000/api/tipo-cambio`
@@ -84,7 +97,7 @@ npm run python-api
 }
 ```
 
-## �🗄️ Estructura de Base de Datos
+## 🗄️ Estructura de Base de Datos
 
 ### Tablas Creadas Automáticamente:
 - **usuarios**: Gestión de usuarios y administradores
@@ -159,6 +172,8 @@ npm run python-api
 - **HTML5, CSS3, Bootstrap 5**
 - **jQuery** para formularios
 - **PHP** para procesamiento de formularios
+- **Footer dinámico** con acceso a equipo y contacto
+- **Visuales mejorados**: cards, colores, íconos animados y textos accesibles
 
 ### APIs Externas:
 - **BCCR** (Banco Central de Costa Rica) para tipos de cambio
@@ -173,8 +188,12 @@ npm run python-api
 - ✅ **Configuración automática** de Python si está disponible
 - ✅ **Limpieza automática** de procesos al cerrar
 - ✅ **APIs REST** para integración con frontend
+- ✅ **Transferencias entre cuentas**: lista de usuarios excluye el logueado, registro doble en movimientos
+- ✅ **Página de equipo** con roles, íconos y descripciones
+- ✅ **Footer universal** con acceso rápido a equipo y contacto
+- ✅ **Colores y accesibilidad mejorados** en cards y textos
 
-### �️ Características de Estabilidad:
+### 🛡️ Características de Estabilidad:
 - ✅ Configuración automática de base de datos
 - ✅ Múltiples credenciales de respaldo
 - ✅ Verificación de integridad de datos
