@@ -239,4 +239,20 @@ Este proyecto está configurado para usar Node.js, integrarse con GitHub y conec
    npm start
    ```
 
+---
+
+## 🌐 Acceso al Frontend
+
+Cuando ejecutes:
+
+```bash
+npm start
+```
+
+Accede al sistema desde:
+
+👉 http://localhost:3000/
+
+Esta URL te mostrará el frontend y tendrás acceso a todas las APIs y backend si están correctamente configurados.
+
 

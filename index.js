@@ -148,8 +148,9 @@ async function startApplication() {
     // 4. Iniciar el servidor HTTP
     server.listen(PORT, () => {
         console.log('\n🌐 SERVIDOR WEB INICIADO');
-        console.log('=' .repeat(30));
-        console.log(`🚀 URL Principal: http://localhost:${PORT}`);
+        console.log('='.repeat(30));
+        console.log(`🚀 URL Principal (Frontend): http://localhost:${PORT}/`);
+        console.log('👉 Accede al sistema desde esta dirección en tu navegador.');
         console.log(`📁 Directorio: ${__dirname}`);
         console.log('\n📋 PÁGINAS DISPONIBLES:');
         console.log(`   🏠 Inicio: http://localhost:${PORT}/`);
