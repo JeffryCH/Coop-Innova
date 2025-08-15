@@ -26,8 +26,8 @@ try {
         $host = 'localhost';
         $db = 'coop_innova';
         $credenciales = [
-            ['user' => 'root', 'password' => 'root'],
-            ['user' => 'root', 'password' => 'kev123']
+            ['user' => 'root', 'password' => ''],
+            ['user' => 'root', 'password' => '']
         ];
         foreach ($credenciales as $cred) {
             $conexion = @new mysqli($host, $cred['user'], $cred['password'], $db);

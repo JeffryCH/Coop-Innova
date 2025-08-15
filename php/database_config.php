@@ -11,8 +11,8 @@ class DatabaseConfig
 
     // Credenciales en orden de prioridad (se probará la primera, luego la segunda)
     private static $credenciales = [
-        ['user' => 'root', 'password' => 'root'],      // Tu configuración
-        ['user' => 'root', 'password' => 'kev123']     // Configuración del compañero
+        ['user' => 'root', 'password' => ''],      // Tu configuración
+        ['user' => 'root', 'password' => '']     // Configuración del compañero
     ];
 
     /**

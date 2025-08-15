@@ -5,8 +5,8 @@ class DatabaseSetup {
         this.host = 'localhost';
         this.database = 'coop_innova';
         this.credentials = [
-            { user: 'root', password: 'root' },      // Primera opción
-            { user: 'root', password: 'kev123' }     // Segunda opción (compañero)
+            { user: 'root', password: '' },      // Primera opción
+            { user: 'root', password: '' }     // Segunda opción (compañero)
         ];
     }
 

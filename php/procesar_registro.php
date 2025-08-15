@@ -11,8 +11,8 @@ if (isset($_POST["nombre"]) && isset($_POST["usuario"]) && isset($_POST["passwor
 
         // Intentar múltiples configuraciones de usuario/contraseña
         $credenciales = [
-            ['user' => 'root', 'password' => 'root'],      // Primera opción
-            ['user' => 'root', 'password' => 'kev123']     // Segunda opción (compañero)
+            ['user' => 'root', 'password' => ''],      // Primera opción
+            ['user' => 'root', 'password' => '']     // Segunda opción (compañero)
         ];
 
         foreach ($credenciales as $cred) {

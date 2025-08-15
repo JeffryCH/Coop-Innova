@@ -11,8 +11,8 @@ function conectarBaseDatos($base_datos = null)
 
     // Intentar múltiples configuraciones de usuario/contraseña
     $credenciales = [
-        ['user' => 'root', 'password' => 'root'],      // Primera opción
-        ['user' => 'root', 'password' => 'kev123']     // Segunda opción (compañero)
+        ['user' => 'root', 'password' => ''],      // Primera opción
+        ['user' => 'root', 'password' => '']     // Segunda opción (compañero)
     ];
 
     foreach ($credenciales as $cred) {

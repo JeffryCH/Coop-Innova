@@ -24,8 +24,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // Intentar múltiples configuraciones de usuario/contraseña
             $credenciales = [
-                ['user' => 'root', 'password' => 'root'],      // Primera opción
-                ['user' => 'root', 'password' => 'kev123']     // Segunda opción (compañero)
+                ['user' => 'root', 'password' => ''],      // Primera opción
+                ['user' => 'root', 'password' => '']     // Segunda opción (compañero)
             ];
 
             foreach ($credenciales as $cred) {
@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Configuración de base de datos
         $host = "localhost";
         $user = "root";
-        $password = "kev123";
+        $password = "";
         $base_datos = "coop_innova";
 
         $nombre = $input["nombre"];
