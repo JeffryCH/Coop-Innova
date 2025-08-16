@@ -89,29 +89,14 @@
             refreshBtn.innerHTML = '⏳ Actualizando...';
             
             try {
-                const response = await fetch('/api/tipo-cambio');
+                const response = await fetch('/php/tipo_cambio_popular.php');
                 const apiResponse = await response.json();
-                
                 console.log('📡 Respuesta API tipo-cambio:', apiResponse);
-                
-                // La estructura es: { data: { success: true, data: { compra, venta } }, lastUpdate, services }
-                if (apiResponse.data && apiResponse.data.success && apiResponse.data.data) {
-                    const tipoCambioData = apiResponse.data.data;
-                    
-                    // Actualizar valores
+                if (apiResponse.success && apiResponse.data) {
+                    const tipoCambioData = apiResponse.data;
                     document.getElementById('compra').textContent = `₡${tipoCambioData.compra.toFixed(2)}`;
                     document.getElementById('venta').textContent = `₡${tipoCambioData.venta.toFixed(2)}`;
-                    
-                    // Actualizar tiempo
-                    const fecha = new Date(apiResponse.lastUpdate);
-                    document.getElementById('ultimaActualizacion').textContent = 
-                        `Última actualización: ${fecha.toLocaleString('es-CR')}`;
-                    
-                    // Mostrar si son datos simulados
-                    if (apiResponse.data.simulated) {
-                        document.getElementById('ultimaActualizacion').innerHTML += 
-                            '<br><span class="badge bg-warning">⚠️ Datos simulados (BCCR no disponible)</span>';
-                    }
+                    document.getElementById('ultimaActualizacion').textContent = `Última actualización: ${tipoCambioData.fecha}`;
                 } else {
                     console.error('❌ Estructura de datos inesperada en tipo-cambio:', apiResponse);
                     throw new Error('No se pudieron obtener los datos');

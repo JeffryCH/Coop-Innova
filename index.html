@@ -195,10 +195,10 @@ let tipoCambioIndex = {
 async function actualizarTipoCambioIndex() {
   try {
     document.getElementById('index-estado-actualizacion').innerHTML = '🔄 Actualizando...';
-    const response = await fetch('/api/tipo-cambio');
+    const response = await fetch('/php/tipo_cambio_popular.php');
     const apiResponse = await response.json();
-    if (apiResponse.data && apiResponse.data.success && apiResponse.data.data) {
-      const tipoCambioData = apiResponse.data.data;
+    if (apiResponse.success && apiResponse.data) {
+      const tipoCambioData = apiResponse.data;
       tipoCambioIndex.usd = {
         compra: tipoCambioData.compra,
         venta: tipoCambioData.venta

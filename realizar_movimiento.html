@@ -9,6 +9,7 @@
 </head>
 <body class="bg-light">
   <div id="navbar"></div>
+  <div id="modal-conversion-container"></div>
   <div class="container pt-5 mt-5">
     <h2 class="text-center text-primary mb-4">Realizar Movimiento</h2>
     <div id="saldo-usuario" class="mb-4"></div>
@@ -17,12 +18,25 @@
   <div id="footer" class="mt-5"></div>
   <script src="js/includes.js"></script>
   <script>
+    // Esperar a que el navbar y la sesión estén listos antes de cargar el formulario
+    document.addEventListener('DOMContentLoaded', () => {
+      // Esperar a que el navbar esté cargado y Auth disponible
+      const esperarNavbar = () => {
+        if (!window.Auth || typeof window.Auth.cargarEstado !== 'function') {
+          setTimeout(esperarNavbar, 200);
+          return;
+        }
+        cargarSaldoYFormulario();
+      };
+      esperarNavbar();
+    });
+
     async function cargarSaldoYFormulario() {
       const saldoDiv = document.getElementById('saldo-usuario');
       const formDiv = document.getElementById('form-movimiento-container');
       let sesion;
       try {
-        sesion = await fetch('php/session.php', { credentials: 'include' }).then(r => r.json());
+        sesion = await window.Auth.cargarEstado();
       } catch (e) { sesion = { user: null }; }
       if (!sesion.user || !sesion.user.id) {
         saldoDiv.innerHTML = '<div class="alert alert-warning">Debes iniciar sesión para realizar movimientos.</div>';

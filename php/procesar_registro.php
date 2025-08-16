@@ -10,7 +10,13 @@ if (isset($_POST["nombre"]) && isset($_POST["usuario"]) && isset($_POST["passwor
     // Usar la conexión centralizada
     $conexion = DatabaseConfig::getConnection();
     if (!$conexion) {
-        die("Error de conexión: No se pudo conectar con ninguna de las credenciales disponibles");
+        if (isAjax()) {
+            header('Content-Type: application/json');
+            echo json_encode(["success" => false, "error" => "Error de conexión: No se pudo conectar con ninguna de las credenciales disponibles"]);
+        } else {
+            die("Error de conexión: No se pudo conectar con ninguna de las credenciales disponibles");
+        }
+        exit;
     }
 
     // Encriptar contraseña antes de guardar
@@ -24,12 +30,23 @@ if (isset($_POST["nombre"]) && isset($_POST["usuario"]) && isset($_POST["passwor
 
     // Ejecutar la inserción
     if ($sql->execute()) {
-        echo "¡Usuario registrado exitosamente!";
+        if (isAjax()) {
+            header('Content-Type: application/json');
+            echo json_encode(["success" => true, "message" => "¡Usuario registrado exitosamente!"]);
+        } else {
+            echo "¡Usuario registrado exitosamente!";
+        }
     } else {
         if ($conexion->errno === 1062) {
-            echo "El nombre de usuario ya existe.";
+            $msg = "El nombre de usuario ya existe.";
         } else {
-            echo "Error al registrar el usuario: " . $sql->error;
+            $msg = "Error al registrar el usuario: " . $sql->error;
+        }
+        if (isAjax()) {
+            header('Content-Type: application/json');
+            echo json_encode(["success" => false, "error" => $msg]);
+        } else {
+            echo $msg;
         }
     }
 
@@ -37,6 +54,20 @@ if (isset($_POST["nombre"]) && isset($_POST["usuario"]) && isset($_POST["passwor
     $conexion->close();
 
 } else {
-    echo "Datos incompletos.";
+    if (isAjax()) {
+        header('Content-Type: application/json');
+        echo json_encode(["success" => false, "error" => "Datos incompletos."]);
+    } else {
+        echo "Datos incompletos.";
+    }
+}
+
+// Función para detectar si la petición es AJAX/fetch
+function isAjax()
+{
+    return (
+        (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') ||
+        (isset($_SERVER['CONTENT_TYPE']) && strpos($_SERVER['CONTENT_TYPE'], 'application/json') !== false)
+    );
 }
 ?>

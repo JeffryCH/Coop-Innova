@@ -10,6 +10,7 @@
 <body class="bg-light">
   <div id="loader-bg"><div class="loader-spinner"></div></div>
   <div id="navbar"></div>
+  <div id="modal-conversion-container"></div>
   <div class="container pt-5 mt-5">
     <h2 class="mb-4 text-primary">Estado de Cuenta</h2>
     <div class="card mb-4 shadow-sm">
@@ -31,6 +32,9 @@
         <tbody id="tablaEstadoCuenta"></tbody>
       </table>
     </div>
+    <nav>
+      <ul class="pagination justify-content-center" id="paginacionEstadoCuenta"></ul>
+    </nav>
   </div>
   <div id="footer" class="mt-5"></div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -39,59 +43,98 @@
     document.addEventListener('DOMContentLoaded', function() {
       var saldoDiv = document.getElementById("saldoCuenta");
       var tabla = document.getElementById("tablaEstadoCuenta");
-      tabla.innerHTML = '<tr><td colspan="3" class="text-center"><div class="spinner-border text-primary"></div> Cargando...</td></tr>';
+      var paginacion = document.getElementById("paginacionEstadoCuenta");
+      var movimientos = [];
+      var paginaActual = 1;
+      var movimientosPorPagina = 10;
+
+      function renderTabla() {
+        tabla.innerHTML = '';
+        if (!movimientos || movimientos.length === 0) {
+          tabla.innerHTML = '<tr><td colspan="4" class="text-center text-info">No se encontraron movimientos.</td></tr>';
+          paginacion.innerHTML = '';
+          return;
+        }
+        var inicio = (paginaActual - 1) * movimientosPorPagina;
+        var fin = inicio + movimientosPorPagina;
+        var paginaMovs = movimientos.slice(inicio, fin);
+        paginaMovs.forEach(m => {
+          var tipo = m.tipo.charAt(0).toUpperCase() + m.tipo.slice(1);
+          var monto = parseFloat(m.monto);
+          var esEntrada = monto > 0;
+          var montoStr = (esEntrada ? '<span class="text-success">' : '<span class="text-danger">') + '₡' + Math.abs(monto).toLocaleString('es-CR', { minimumFractionDigits: 2 }) + '</span>';
+          var fecha = new Date(m.fecha).toLocaleString();
+          var estadoCredito = '';
+          if (m.tipo === 'credito') {
+            if (m.estado === 'aprobado') {
+              estadoCredito = '<span class="badge bg-success">Aprobado</span>';
+            } else if (m.estado === 'denegado' || m.estado === 'rechazado') {
+              estadoCredito = '<span class="badge bg-danger">Denegado</span>';
+            } else {
+              estadoCredito = '<span class="badge bg-warning text-dark">Pendiente</span>';
+            }
+          } else {
+            estadoCredito = '-';
+          }
+          tabla.innerHTML += '<tr>' +
+            '<td>' + tipo + (esEntrada ? ' <span class="badge bg-success">Entrada</span>' : ' <span class="badge bg-danger">Salida</span>') + '</td>' +
+            '<td>' + montoStr + '</td>' +
+            '<td>' + fecha + '</td>' +
+            '<td>' + estadoCredito + '</td>' +
+            '</tr>';
+        });
+        renderPaginacion();
+      }
+
+      function renderPaginacion() {
+        paginacion.innerHTML = '';
+        var totalPaginas = Math.ceil(movimientos.length / movimientosPorPagina);
+        if (totalPaginas <= 1) return;
+        for (var i = 1; i <= totalPaginas; i++) {
+          var li = document.createElement('li');
+          li.className = 'page-item' + (i === paginaActual ? ' active' : '');
+          var a = document.createElement('a');
+          a.className = 'page-link';
+          a.textContent = i;
+          a.href = '#';
+          a.addEventListener('click', function(e) {
+            e.preventDefault();
+            paginaActual = parseInt(this.textContent);
+            renderTabla();
+          });
+          li.appendChild(a);
+          paginacion.appendChild(li);
+        }
+      }
+
+      tabla.innerHTML = '<tr><td colspan="4" class="text-center"><div class="spinner-border text-primary"></div> Cargando...</td></tr>';
       fetch('php/session.php', { credentials: 'include' })
         .then(r => r.json())
         .then(sesion => {
           if (!sesion.user || !sesion.user.id) {
-            tabla.innerHTML = '<tr><td colspan="3" class="text-center text-warning">Debes iniciar sesión para ver tu estado de cuenta.</td></tr>';
+            tabla.innerHTML = '<tr><td colspan="4" class="text-center text-warning">Debes iniciar sesión para ver tu estado de cuenta.</td></tr>';
             saldoDiv.textContent = '₡0.00';
+            paginacion.innerHTML = '';
             return;
           }
           fetch('php/saldo_movimientos_api.php', { credentials: 'include' })
             .then(resp => resp.json())
             .then(data => {
               saldoDiv.textContent = '₡' + parseFloat(data.saldo).toLocaleString('es-CR', { minimumFractionDigits: 2 });
-              if (!data.movimientos || data.movimientos.length === 0) {
-                tabla.innerHTML = '<tr><td colspan="3" class="text-center text-info">No se encontraron movimientos.</td></tr>';
-                return;
-              }
-              tabla.innerHTML = '';
-              data.movimientos.forEach(m => {
-                var tipo = m.tipo.charAt(0).toUpperCase() + m.tipo.slice(1);
-                var monto = parseFloat(m.monto);
-                var esEntrada = monto > 0;
-                var montoStr = (esEntrada ? '<span class="text-success">' : '<span class="text-danger">') + '₡' + Math.abs(monto).toLocaleString('es-CR', { minimumFractionDigits: 2 }) + '</span>';
-                var fecha = new Date(m.fecha).toLocaleString();
-                // Estado de crédito
-                var estadoCredito = '';
-                if (m.tipo === 'credito') {
-                  if (m.estado === 'aprobado') {
-                    estadoCredito = '<span class="badge bg-success">Aprobado</span>';
-                  } else if (m.estado === 'denegado') {
-                    estadoCredito = '<span class="badge bg-danger">Denegado</span>';
-                  } else {
-                    estadoCredito = '<span class="badge bg-warning text-dark">Pendiente</span>';
-                  }
-                } else {
-                  estadoCredito = '-';
-                }
-                tabla.innerHTML += '<tr>' +
-                  '<td>' + tipo + (esEntrada ? ' <span class="badge bg-success">Entrada</span>' : ' <span class="badge bg-danger">Salida</span>') + '</td>' +
-                  '<td>' + montoStr + '</td>' +
-                  '<td>' + fecha + '</td>' +
-                  '<td>' + estadoCredito + '</td>' +
-                  '</tr>';
-              });
+              movimientos = data.movimientos || [];
+              paginaActual = 1;
+              renderTabla();
             })
             .catch(() => {
-              tabla.innerHTML = '<tr><td colspan="3" class="text-center text-danger">Error al cargar estado de cuenta.</td></tr>';
+              tabla.innerHTML = '<tr><td colspan="4" class="text-center text-danger">Error al cargar estado de cuenta.</td></tr>';
               saldoDiv.textContent = '₡0.00';
+              paginacion.innerHTML = '';
             });
         })
         .catch(() => {
-          tabla.innerHTML = '<tr><td colspan="3" class="text-center text-danger">Error al cargar sesión.</td></tr>';
+          tabla.innerHTML = '<tr><td colspan="4" class="text-center text-danger">Error al cargar sesión.</td></tr>';
           saldoDiv.textContent = '₡0.00';
+          paginacion.innerHTML = '';
         });
     });
   </script>

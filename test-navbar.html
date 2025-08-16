@@ -88,7 +88,7 @@
             
             document.getElementById('btn-api').addEventListener('click', async function() {
                 try {
-                    const response = await fetch('/api/tipo-cambio');
+                    const response = await fetch('/php/tipo_cambio_popular.php');
                     const data = await response.json();
                     console.log('API Response:', data);
                     alert('Ver consola para respuesta de API');

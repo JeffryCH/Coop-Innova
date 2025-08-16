@@ -25,11 +25,14 @@ if ($resSaldo && $row = $resSaldo->fetch_assoc()) {
 
 // Obtener movimientos
 $resMov = $conexion->query("SELECT m.tipo, m.monto, m.fecha, 
-    CASE WHEN m.tipo = 'credito' THEN c.estado ELSE NULL END AS estado
+    CASE WHEN m.tipo = 'credito' THEN (
+        SELECT estado FROM creditos 
+        WHERE usuario_id = m.usuario_id AND monto = m.monto 
+        ORDER BY fecha DESC LIMIT 1
+    ) ELSE NULL END AS estado
     FROM movimientos m 
-    LEFT JOIN creditos c ON m.tipo = 'credito' AND m.usuario_id = c.usuario_id AND m.monto = c.monto AND DATE(m.fecha) = DATE(c.fecha)
     WHERE m.usuario_id = $id_usuario 
-    ORDER BY m.fecha DESC LIMIT 50");
+    ORDER BY m.fecha DESC");
 $movimientos = [];
 if ($resMov) {
     while ($row = $resMov->fetch_assoc()) {

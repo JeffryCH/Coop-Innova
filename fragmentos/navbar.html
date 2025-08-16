@@ -98,7 +98,7 @@ async function actualizarTipoCambio() {
     
     // Obtener datos de la API
     console.log('🌐 [NAVBAR] Consultando API...');
-    const response = await fetch('/api/tipo-cambio');
+  const response = await fetch('/php/tipo_cambio_popular.php');
     
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);

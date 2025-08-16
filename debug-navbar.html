@@ -61,7 +61,7 @@
                 result.innerHTML = '🔄 Probando API...';
                 
                 try {
-                    const response = await fetch('/api/tipo-cambio');
+                    const response = await fetch('/php/tipo_cambio_popular.php');
                     const data = await response.json();
                     
                     result.innerHTML = `

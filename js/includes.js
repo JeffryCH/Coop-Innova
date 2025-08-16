@@ -7,22 +7,14 @@ async function actualizarTipoCambioNavbar() {
     const eurVentaEl = document.getElementById('navbar-eur-venta');
     if (!compraEl || !ventaEl || !eurCompraEl || !eurVentaEl) return;
 
-    const response = await fetch('/api/tipo-cambio');
+  const response = await fetch('/php/tipo_cambio_popular.php');
     const apiResponse = await response.json();
-    if (apiResponse.data && apiResponse.data.success && apiResponse.data.data) {
-      const tipoCambioData = apiResponse.data.data;
+    if (apiResponse.success && apiResponse.data) {
+      const tipoCambioData = apiResponse.data;
       compraEl.textContent = `₡${tipoCambioData.compra.toFixed(0)}`;
       ventaEl.textContent = `₡${tipoCambioData.venta.toFixed(0)}`;
-      // EUR calculado (USD + 2%)
       eurCompraEl.textContent = `₡${Math.round(tipoCambioData.compra * 1.02)}`;
       eurVentaEl.textContent = `₡${Math.round(tipoCambioData.venta * 1.02)}`;
-      // Guardar en variable global para otros módulos
-      window.tcBancoPopular = {
-        compra: tipoCambioData.compra,
-        venta: tipoCambioData.venta
-      };
-      // Disparar evento para otros componentes
-      window.dispatchEvent(new CustomEvent('tipoCambioActualizado', { detail: window.tcBancoPopular }));
     } else {
       compraEl.textContent = ventaEl.textContent = eurCompraEl.textContent = eurVentaEl.textContent = '--';
     }
@@ -192,29 +184,87 @@ function cargarModalConversion(callback) {
       modalDiv.innerHTML = html;
       document.body.appendChild(modalDiv.firstElementChild);
       if (typeof callback === "function") callback();
-      // Llamar setupConversionForm y actualizarTipoCambioModal después de cargar el modal
+      // Llamar solo setupConversionForm después de cargar el modal
       setTimeout(() => {
         setupConversionForm();
-        actualizarTipoCambioModal();
+        // NO llamar actualizarTipoCambioModal aquí, el modal se actualiza al abrir
       }, 200);
     });
 }
 
-function mostrarModalConversion() {
-  actualizarTipoCambioModal();
+async function mostrarModalConversion() {
+  // Consulta individual para el modal, sin variables globales ni eventos
+  try {
+    const response = await fetch('/php/tipo_cambio_popular.php');
+    const apiResponse = await response.json();
+    const compraEl = document.getElementById('modal-usd-compra');
+    const ventaEl = document.getElementById('modal-usd-venta');
+    const eurCompraEl = document.getElementById('modal-eur-compra');
+    const eurVentaEl = document.getElementById('modal-eur-venta');
+    // Conversiones rápidas
+    const quickUSD = document.getElementById('quick-100usd');
+    const quickEUR = document.getElementById('quick-100eur');
+    const quickCRC = document.getElementById('quick-100000crc');
+    if (apiResponse.success && apiResponse.data) {
+      const compra = apiResponse.data.compra;
+      const venta = apiResponse.data.venta;
+      if (compraEl) compraEl.textContent = `₡${compra.toFixed(0)}`;
+      if (ventaEl) ventaEl.textContent = `₡${venta.toFixed(0)}`;
+      if (eurCompraEl) eurCompraEl.textContent = `₡${Math.round(compra * 1.02)}`;
+      if (eurVentaEl) eurVentaEl.textContent = `₡${Math.round(venta * 1.02)}`;
+      // Conversiones rápidas
+      if (quickUSD) quickUSD.textContent = venta ? `₡${(100 * venta).toLocaleString()}` : '--';
+      if (quickEUR) quickEUR.textContent = venta ? `₡${(100 * venta * 1.02).toLocaleString()}` : '--';
+      if (quickCRC) quickCRC.textContent = compra ? `$${(100000 / compra).toFixed(2)}` : '--';
+    } else {
+      if (compraEl) compraEl.textContent = '--';
+      if (ventaEl) ventaEl.textContent = '--';
+      if (eurCompraEl) eurCompraEl.textContent = '--';
+      if (eurVentaEl) eurVentaEl.textContent = '--';
+      if (quickUSD) quickUSD.textContent = '--';
+      if (quickEUR) quickEUR.textContent = '--';
+      if (quickCRC) quickCRC.textContent = '--';
+    }
+  } catch (e) {
+    const compraEl = document.getElementById('modal-usd-compra');
+    const ventaEl = document.getElementById('modal-usd-venta');
+    const eurCompraEl = document.getElementById('modal-eur-compra');
+    const eurVentaEl = document.getElementById('modal-eur-venta');
+    const quickUSD = document.getElementById('quick-100usd');
+    const quickEUR = document.getElementById('quick-100eur');
+    const quickCRC = document.getElementById('quick-100000crc');
+    if (compraEl) compraEl.textContent = '--';
+    if (ventaEl) ventaEl.textContent = '--';
+    if (eurCompraEl) eurCompraEl.textContent = '--';
+    if (eurVentaEl) eurVentaEl.textContent = '--';
+    if (quickUSD) quickUSD.textContent = '--';
+    if (quickEUR) quickEUR.textContent = '--';
+    if (quickCRC) quickCRC.textContent = '--';
+  }
   const modal = document.getElementById('modal-conversion');
   if (!modal) return;
-  modal.style.display = 'flex';
-  modal.setAttribute('aria-hidden', 'false');
-  document.body.style.overflow = 'hidden';
-  // Centrar el modal y ajustar el fondo
-  modal.style.alignItems = 'center';
-  modal.style.justifyContent = 'center';
-  // Focus en el input al abrir
-  setTimeout(() => {
-    const input = document.getElementById('cantidad-origen');
-    if (input) input.focus();
-  }, 100);
+  // Verificar sesión y mostrar opciones de usuario si está logueado
+  fetch('php/session.php', { credentials: 'include' })
+    .then(r => r.json())
+    .then(sesion => {
+      const opcionesDiv = document.getElementById('usuario-opciones-modal');
+      if (opcionesDiv) {
+        if (sesion.user && sesion.user.id) {
+          opcionesDiv.style.display = '';
+        } else {
+          opcionesDiv.style.display = 'none';
+        }
+      }
+      modal.style.display = 'flex';
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+      modal.style.alignItems = 'center';
+      modal.style.justifyContent = 'center';
+      setTimeout(() => {
+        const input = document.getElementById('cantidad-origen');
+        if (input) input.focus();
+      }, 100);
+    });
 }
 
 function cerrarModalConversion() {
@@ -248,6 +298,8 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
   });
+
+  // === Actualizar tipo de cambio en el index ===
 });
 
 // === Lógica de Conversión de Monedas ===
@@ -623,7 +675,7 @@ async function actualizarTipoCambioModal() {
     const ultimaEl = document.getElementById('ultima-actualizacion');
     if (!compraEl || !ventaEl || !eurCompraEl || !eurVentaEl || !ultimaEl) return;
 
-    const response = await fetch('/api/tipo-cambio');
+  const response = await fetch('/php/tipo_cambio_popular.php');
     const apiResponse = await response.json();
     if (apiResponse.data && apiResponse.data.success && apiResponse.data.data) {
       const tipoCambioData = apiResponse.data.data;
@@ -689,22 +741,36 @@ window.Auth = {
         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">👋 ${user.nombre} (${user.rol})</a>
         <ul class="dropdown-menu dropdown-menu-end">
           <li><a class="dropdown-item" href="ver_perfil.html">Perfil</a></li>
-          <li><a class="dropdown-item" href="movimientos.html">Mis movimientos</a></li>
+          <li><a class="dropdown-item" href="estado_cuenta.html">Estado de cuenta</a></li>
           <li><a class="dropdown-item" href="historial_creditos.html">Historial de créditos</a></li>
+          <li><a class="dropdown-item" href="movimientos.html">Mis movimientos</a></li>
           <li><a class="dropdown-item" href="realizar_movimiento.html">Realizar movimiento</a></li>
           <li><hr class="dropdown-divider"></li>
           <li><a id="btn-logout" class="dropdown-item" href="#">Cerrar sesión</a></li>
         </ul>`;
       menu.appendChild(liUser);
 
-      const btnLogout = liUser.querySelector('#btn-logout');
-      btnLogout?.addEventListener('click', async (e) => {
-        e.preventDefault();
-        const resp = await Auth.logout();
-        if (resp.success) {
-          location.href = 'index.html';
-        }
-      });
+        // Corregir navegación de los enlaces del menú de usuario
+        liUser.querySelectorAll('.dropdown-item').forEach(item => {
+          // Si es el botón de logout, manejar con JS
+          if (item.id === 'btn-logout') {
+            item.addEventListener('click', async (e) => {
+              e.preventDefault();
+              const resp = await Auth.logout();
+              if (resp.success) {
+                location.href = 'index.html';
+              }
+            });
+          } else {
+            // Para los demás, navegar correctamente
+            item.addEventListener('click', function(e) {
+              const href = item.getAttribute('href');
+              if (href && href !== '#') {
+                window.location.href = href;
+              }
+            });
+          }
+        });
     } else {
       const liLogin = document.createElement('li');
       liLogin.className = 'nav-item';

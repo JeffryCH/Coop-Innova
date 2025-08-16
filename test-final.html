@@ -95,7 +95,7 @@
             document.getElementById('test-api').addEventListener('click', async function() {
                 console.log('🧪 [TEST] Iniciando test de API...');
                 try {
-                    const response = await fetch('/api/tipo-cambio');
+                    const response = await fetch('/php/tipo_cambio_popular.php');
                     const data = await response.json();
                     console.log('📦 [TEST] API Response:', data);
                     

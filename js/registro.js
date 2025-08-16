@@ -15,11 +15,33 @@ $(document).ready(function () {
                 rol: rol
             },
             success: function (respuesta) {
-                $("#respuesta").html('<div class="alert alert-success">' + respuesta + '</div>');
-                $("#formRegistro")[0].reset();
+                let msg = "";
+                let isSuccess = false;
+                // Intentar parsear como JSON
+                try {
+                    let json = typeof respuesta === "string" ? JSON.parse(respuesta) : respuesta;
+                    if (json.success) {
+                        msg = json.message || "¡Usuario registrado exitosamente!";
+                        isSuccess = true;
+                    } else {
+                        msg = json.error || "Error al registrar el usuario.";
+                    }
+                } catch (e) {
+                    // Si no es JSON, mostrar como texto plano
+                    msg = respuesta;
+                    isSuccess = msg.toLowerCase().includes("exitosamente");
+                }
+                const alertClass = isSuccess ? "alert-success" : "alert-danger";
+                $("#respuesta").html('<div class="alert ' + alertClass + '">' + msg + '</div>');
+                if (isSuccess) $("#formRegistro")[0].reset();
             },
             error: function (xhr, status, error) {
-                $("#respuesta").html('<div class="alert alert-danger">Error al procesar el registro.</div>');
+                let msg = "Error al procesar el registro.";
+                try {
+                    let json = JSON.parse(xhr.responseText);
+                    msg = json.error || msg;
+                } catch (e) {}
+                $("#respuesta").html('<div class="alert alert-danger">' + msg + '</div>');
                 console.error("Error AJAX:", xhr.responseText);
             }
         });
